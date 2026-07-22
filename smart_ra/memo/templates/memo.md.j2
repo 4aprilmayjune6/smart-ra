@@ -1,0 +1,72 @@
+# 위험평가 메모(초안) — {{ eng.corp_name }} ({{ eng.fiscal_year }} 회계연도)
+
+> ⚠ 자동 생성 초안 · 모드: {{ memo_mode }} · 스냅샷 `{{ snapshot_id }}` · 룰버전 `{{ rule_version }}` · 생성 {{ generated_at }}
+
+## 1. 개요
+- 대상회사: {{ eng.corp_name }} (corp_code {{ eng.corp_code }}{% if eng.stock_code %}, 종목 {{ eng.stock_code }}{% endif %})
+- 산업(KSIC): {{ eng.ksic_code }}{% if industry %} — {{ industry.name }}{% endif %}
+- 감사연도: {{ eng.fiscal_year }}
+- 생성 메타: 데이터 스냅샷 `{{ snapshot_id }}`, 룰 버전 `{{ rule_version }}`
+
+## 2. 위험신호 요약
+| 모듈 | 🔴 RED | 🟡 YELLOW | 🟢 GREEN |
+|---|---|---|---|
+| M1 공시 | {{ counts.M1.RED }} | {{ counts.M1.YELLOW }} | {{ counts.M1.GREEN }} |
+| M2 산업 | {{ counts.M2.RED }} | {{ counts.M2.YELLOW }} | {{ counts.M2.GREEN }} |
+| M3 계속기업 | {{ counts.M3.RED }} | {{ counts.M3.YELLOW }} | {{ counts.M3.GREEN }} |
+
+주요 신호:
+{% for s in signals if s.severity.value != 'GREEN' %}- {{ s.severity.emoji }} [{{ s.module }}.{{ s.category }}] {{ s.title }}{% if s.evidence and s.evidence[0].rcept_no %} · 근거: [{{ s.evidence[0].rcept_no }}]({{ s.evidence[0].url }}){% endif %}
+{% endfor %}
+
+## 3. 핵심위험 상세
+{% for kr in key_risks %}
+### 3.{{ loop.index }} {{ kr.title }}{% if kr.significant_risk_candidate %} · **유의적 위험 후보**{% endif %}
+- 수렴 근거: {{ kr.rationale }}
+- 기여 신호: {% if kr.source_signals %}{{ kr.source_signals | join(', ') }}{% else %}(상시){% endif %}
+- 관련 계정: {{ kr.accounts | join(', ') or '해당 없음' }}
+- 경영진 주장: {{ kr.assertions | join(', ') or '해당 없음' }}
+- 관련 기준서: {{ kr.standards | join(', ') }}
+- 권고 후속 감사절차:
+{% for p in kr.procedures %}  - {{ p }}{% if procedures.get(p) %} — {{ procedures[p].title }}: {{ procedures[p].text }}{% endif %}
+{% endfor %}
+{% if kr.jet_updates %}- JET 룰 가중치 조정안(315→240):
+{% for j in kr.jet_updates %}  - `{{ j.rule_id }}` × {{ j.weight_multiplier }} ({{ j.reason }})
+{% endfor %}{% endif %}
+{% endfor %}
+
+## 4. 계속기업 평가 (KSA 570)
+- 종합 판정: {{ gc.overall_severity.emoji }} **{{ gc.overall_severity.value }}** (점수 {{ gc.overall_score }}){% if gc.hard_rule_triggered %} · 하드룰: **{{ gc.hard_rule_triggered }}**{% endif %}
+
+| 지표 | 판정 | 근거 | KSA 570 A3 |
+|---|---|---|---|
+{% for i in gc.indicators %}| {{ i.name }} | {{ i.severity.emoji }} {{ i.severity.value }} | {{ i.reason }} | {{ i.ksa570_tag }} |
+{% endfor %}
+
+## 5. 부정위험 고려 (KSA 240)
+- **경영진의 내부통제 무력화 위험은 상시 유의적 위험으로 간주**한다(KSA 240 문단 31).
+- 부정 관련 신호:
+{% for s in signals if s.module == 'M1' and s.category == 'RISK_KEYWORD' and s.severity.value == 'RED' %}  - {{ s.title }} · 근거 [{{ s.evidence[0].rcept_no }}]({{ s.evidence[0].url }})
+{% else %}  - (탐지된 부정 관련 RED 키워드 없음)
+{% endfor %}
+- 분개테스트(JET) 연동 내역은 7절 참조.
+
+## 6. 산업 고유 위험 점검 (모듈 2)
+{% if industry %}- 산업: **{{ industry.name }}** (KSIC 접두 {{ industry.ksic_prefixes | join(', ') }})
+{% for item in industry.risk_items %}- {{ item.risk_id }} · {{ item.account }}: {{ item.issue }} [{{ (item.standards.kifrs + item.standards.ksa) | join(', ') }}]{% if item.risk_id in kam_matched %} · **전기 KAM 일치**{% endif %}
+{% endfor %}{% else %}- 산업 프로파일 미매핑 — 수동 지정 필요{% endif %}
+
+## 7. 전표분석(JET) 연동 내역 (315→240 추적)
+{% if jet_trace %}| JET 룰 | 배수 | 사유 | 원천 핵심위험 |
+|---|---|---|---|
+{% for t in jet_trace %}| `{{ t.rule_id }}` | {{ t.weight_multiplier }} | {{ t.reason }} | {{ t.key_risk }} |
+{% endfor %}{% else %}- 조정 대상 JET 룰 없음{% endif %}
+
+## 8. 기타 관찰사항·수동확인 목록
+{% for pi in parse_issues %}- [{{ pi.level }}] {{ pi.where }}: {{ pi.detail }}
+{% else %}- 수집·파싱 실패 항목 없음
+{% endfor %}
+- 데이터 한계: 본 분석은 DART 공개 공시·재무 데이터에 한한다.
+
+## 9. 한계 및 면책
+{{ disclaimer }}

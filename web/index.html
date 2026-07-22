@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART-RA · 감사 위험평가 산출물</title>
+<meta name="description" content="DART 공시 기반 감사 위험평가 자동화(SMART-RA) 참조구현 산출물 — 위험평가 메모·대시보드·제안요청서.">
+<style>
+  :root {
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Pretendard,sans-serif;
+    --mono:ui-monospace,"Cascadia Code",Consolas,Menlo,monospace;
+    --paper:#eef1f6; --sheet:#fff; --ink:#191d26; --muted:#56606f; --faint:#8b94a2;
+    --rule:#dde2ea; --rule-strong:#c6cedb; --accent:#1f3a5f; --accent-soft:#e9eef6;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0a0d12; --sheet:#14181f; --ink:#e7ebf2; --muted:#99a3b1; --faint:#69717f;
+    --rule:#232a36; --rule-strong:#333c4b; --accent:#88adde; --accent-soft:#182541;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:56px 24px 80px}
+  header{border-bottom:2px solid var(--accent);padding-bottom:22px;margin-bottom:8px}
+  .kicker{font-size:.7rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+  h1{font-family:var(--serif);font-size:2.5rem;line-height:1.1;font-weight:600;margin:.35em 0 .15em;
+    letter-spacing:-.01em}
+  .lead{color:var(--muted);font-size:1.05rem;max-width:60ch}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--muted);background:var(--accent-soft);
+    border:1px solid var(--rule-strong);border-radius:999px;padding:4px 11px}
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule-strong);
+    padding-bottom:8px;margin-bottom:18px;flex-wrap:wrap}
+  .sec-h h2{font-size:1.15rem;margin:0;font-weight:700}
+  .sec-h span{color:var(--faint);font-size:.82rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:16px}
+  .card{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;
+    background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;
+    transition:border-color .15s, transform .15s, box-shadow .15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(20,30,50,.10)}
+  .card.featured{border-left:5px solid var(--accent);background:var(--accent-soft)}
+  .ctag{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+  .card h3{font-family:var(--serif);font-size:1.24rem;font-weight:700;margin:0}
+  .card p{margin:0;color:var(--muted);font-size:.88rem;flex:1}
+  .cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+  .open{font-size:.82rem;font-weight:700;color:var(--accent)}
+  .pdf{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--muted);
+    border:1px solid var(--rule-strong);border-radius:6px;padding:3px 9px;text-decoration:none}
+  .pdf:hover{border-color:var(--accent);color:var(--accent)}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);color:var(--faint);
+    font-size:.8rem;line-height:1.7}
+  footer code{font-family:var(--mono);color:var(--muted)}
+  a.src{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">DART · 감사 위험평가 자동화 (참조구현)</div>
+      <h1>SMART-RA 산출물</h1>
+      <p class="lead">한국 회계법인 감사계획용 위험평가 자동화 플랫폼의 참조구현 산출물입니다.
+      판정은 서버측 <strong>결정론 룰·산식</strong>으로, 서술은 근거 인용 기반으로 생성됩니다.</p>
+      <div class="badges">
+        <span class="badge">KSA 315·240·570</span>
+        <span class="badge">K-IFRS 1115·1036·1002</span>
+        <span class="badge">MCP 서버(16종 도구)</span>
+        <span class="badge">결정론 · 재현가능</span>
+        <span class="badge">자동생성 초안(SFR-405)</span>
+      </div>
+    </header>
+    <section>
+      <div class="sec-h"><h2>실데이터 메모</h2><span>OpenDART 실공시 기반 · 외부 공개정보(기사·감리선례) 편입</span></div>
+      <div class="grid"><a class="card featured" href="memo-amore-2025.html">
+        <div class="ctag">실데이터 + 외부신호</div>
+        <h3>아모레퍼시픽 · FY2025</h3>
+        <p>OpenDART 실데이터(사업보고서 2026-03) 기반 위험평가 메모. 핵심위험 3건·외부 공개정보 7건. PDF 제공.</p>
+        <div class="cfoot"><span class="open">열기 →</span><a class="pdf" href="memo-amore-2025.pdf" download>PDF ↓</a></div>
+      </a><a class="card" href="memo-samsung.html">
+        <div class="ctag">실데이터 + 외부신호</div>
+        <h3>삼성전자 · FY2024</h3>
+        <p>대형 제조업 실데이터 메모. 공시·산업·재무 신호 교차검증 + 감리 선례 편입.</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a></div>
+    </section>
+<section>
+      <div class="sec-h"><h2>샘플 메모</h2><span>인증키 없이 재현되는 fixture 3사</span></div>
+      <div class="grid"><a class="card" href="memo-daeyang.html">
+        <div class="ctag">건전 제조</div>
+        <h3>대양제조 · 샘플</h3>
+        <p>fixture 샘플 — 계속기업 GREEN(재무 양호) 사례.</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a><a class="card" href="memo-hanbit.html">
+        <div class="ctag">부실 · 하드룰 RED</div>
+        <h3>한빛건설 · 샘플</h3>
+        <p>fixture 샘플 — 계속기업 하드룰 발동으로 즉시 적색 판정.</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a><a class="card" href="memo-geno.html">
+        <div class="ctag">수익 전 바이오 · YELLOW</div>
+        <h3>제노바이오 · 샘플</h3>
+        <p>fixture 샘플 — 현금 runway 기반 계속기업 불확실성(YELLOW).</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a></div>
+    </section>
+<section>
+      <div class="sec-h"><h2>대시보드</h2><span>다회사 위험 비교</span></div>
+      <div class="grid"><a class="card" href="dashboard.html">
+        <div class="ctag">다회사 비교</div>
+        <h3>위험평가 대시보드</h3>
+        <p>회사별 신호등·계속기업 점수·핵심위험을 한눈에 비교하는 대시보드.</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a></div>
+    </section>
+<section>
+      <div class="sec-h"><h2>제안요청서</h2><span>요구사항 명세 전문</span></div>
+      <div class="grid"><a class="card" href="rfp.html">
+        <div class="ctag">v1.3</div>
+        <h3>제안요청서(RFP) 전문</h3>
+        <p>SMART-RA 제안요청서 전문. IR-07 외부정보 소스 등 신규 요구사항 상단 요약.</p>
+        <div class="cfoot"><span class="open">열기 →</span></div>
+      </a></div>
+    </section>
+    <footer>
+      본 산출물은 시스템이 자동 생성한 <strong>초안(draft)</strong>이며 감사인의 전문가적 판단을 대체하지 않습니다.
+      최종 위험평가·유의적 위험 결정·감사절차 결정은 업무수행이사와 감사팀이 수행합니다(감사기준서 500·SFR-405).<br>
+      산업 위험맵·교차검증 룰의 감사 콘텐츠는 참조용 초안으로, 실제 사용 전 회계사(SME) 검수가 필요합니다.<br>
+      소스코드 · MCP 서버: <a class="src" href="https://github.com/">GitHub 저장소</a> · 룰 <code>risk-rules@0.1.0</code>
+    </footer>
+  </div>
+</body>
+</html>

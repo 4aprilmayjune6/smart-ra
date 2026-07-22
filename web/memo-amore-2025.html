@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>위험평가 메모 · 아모레퍼시픽 2025</title>
+<style>
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: system-ui, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", Pretendard, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, Menlo, monospace;
+
+    --paper: #eef1f6; --sheet: #ffffff; --ink: #191d26; --muted: #56606f;
+    --faint: #8b94a2; --rule: #dde2ea; --rule-strong: #c6cedb;
+    --accent: #1f3a5f; --accent-soft: #e9eef6;
+    --red: #b23a2e; --red-soft: #f7e7e4; --amber: #946207; --amber-soft: #f6edd4;
+    --green: #2b7a50; --green-soft: #e2f0e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0a0d12; --sheet: #14181f; --ink: #e7ebf2; --muted: #99a3b1;
+      --faint: #69717f; --rule: #232a36; --rule-strong: #333c4b;
+      --accent: #88adde; --accent-soft: #182541;
+      --red: #e37264; --red-soft: #2a1512; --amber: #dcac47; --amber-soft: #271f10;
+      --green: #5cbf88; --green-soft: #112318;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #eef1f6; --sheet: #ffffff; --ink: #191d26; --muted: #56606f;
+    --faint: #8b94a2; --rule: #dde2ea; --rule-strong: #c6cedb;
+    --accent: #1f3a5f; --accent-soft: #e9eef6;
+    --red: #b23a2e; --red-soft: #f7e7e4; --amber: #946207; --amber-soft: #f6edd4;
+    --green: #2b7a50; --green-soft: #e2f0e8;
+  }
+  :root[data-theme="dark"] {
+    --paper: #0a0d12; --sheet: #14181f; --ink: #e7ebf2; --muted: #99a3b1;
+    --faint: #69717f; --rule: #232a36; --rule-strong: #333c4b;
+    --accent: #88adde; --accent-soft: #182541;
+    --red: #e37264; --red-soft: #2a1512; --amber: #dcac47; --amber-soft: #271f10;
+    --green: #5cbf88; --green-soft: #112318;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
+    font-size: 16px; line-height: 1.62; -webkit-font-smoothing: antialiased; }
+  .sheet { max-width: 860px; margin: 26px auto; background: var(--sheet); padding: 56px 62px 72px;
+    box-shadow: 0 1px 2px rgba(20,30,50,.05), 0 18px 50px rgba(20,30,50,.10);
+    border: 1px solid var(--rule); }
+  @media (max-width: 680px) { .sheet { padding: 34px 22px 48px; margin: 0; } }
+
+  .s-RED { --sv: var(--red); --sv-soft: var(--red-soft); }
+  .s-YELLOW { --sv: var(--amber); --sv-soft: var(--amber-soft); }
+  .s-GREEN { --sv: var(--green); --sv-soft: var(--green-soft); }
+
+  /* letterhead */
+  .letterhead { display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--accent); flex-wrap: wrap; }
+  .wm { font-family: var(--serif); font-weight: 600; font-size: 1.15rem; letter-spacing: .02em;
+    color: var(--accent); }
+  .wm small { display: block; font-family: var(--sans); font-size: .64rem; font-weight: 700;
+    letter-spacing: .22em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; }
+  .controls { display: flex; gap: 8px; }
+  .btn { font-family: var(--sans); font-size: .7rem; font-weight: 600; letter-spacing: .04em;
+    color: var(--muted); background: transparent; border: 1px solid var(--rule-strong);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .doctitle { font-family: var(--serif); font-size: 2.35rem; line-height: 1.12; font-weight: 600;
+    letter-spacing: -.01em; margin: 26px 0 4px; text-wrap: balance; }
+  .docsub { color: var(--muted); font-size: 1.02rem; }
+  .draft-mark { display: inline-block; font-family: var(--sans); font-size: .66rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--amber); border: 1px solid var(--amber);
+    border-radius: 4px; padding: 2px 8px; vertical-align: middle; margin-left: 10px; }
+
+  /* metadata grid — working-paper header block */
+  .meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); margin: 24px 0 8px; }
+  @media (max-width: 680px) { .meta { grid-template-columns: repeat(2, 1fr); } }
+  .meta div { background: var(--sheet); padding: 10px 13px; }
+  .meta dt { font-size: .64rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 3px; }
+  .meta dd { margin: 0; font-family: var(--mono); font-size: .84rem; color: var(--ink);
+    font-variant-numeric: tabular-nums; }
+
+  /* summary band — 핵심위험/유의적위험 우선 요약 */
+  .summary { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 14px; margin: 22px 0 8px; }
+  @media (max-width: 680px) { .summary { grid-template-columns: 1fr; } }
+  .stat { padding: 16px 20px; border-radius: 10px; border: 1px solid var(--rule-strong);
+    background: var(--sheet); }
+  .stat.hero { background: var(--accent-soft); border-color: var(--accent); border-left: 5px solid var(--accent); }
+  .stat.gc { background: var(--sv-soft); border-color: var(--sv); border-left: 5px solid var(--sv); }
+  .stat .lbl { font-size: .64rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 7px; }
+  .stat .big { font-family: var(--serif); font-size: 2rem; font-weight: 700; line-height: 1; }
+  .stat.hero .big { color: var(--accent); }
+  .stat.gc .big { color: var(--sv); font-family: var(--mono); font-size: 1.7rem;
+    font-variant-numeric: tabular-nums; }
+  .stat .unit { font-family: var(--sans); font-size: .82rem; font-weight: 600; color: var(--faint);
+    letter-spacing: 0; }
+  .stat .sub { font-size: .74rem; color: var(--muted); margin-top: 9px; line-height: 1.45; }
+  .stat.gc .sub { color: var(--sv); font-weight: 600; }
+
+  /* section headers with serif numerals */
+  section { margin-top: 40px; }
+  .sec-h { display: flex; align-items: baseline; gap: 14px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule-strong); margin-bottom: 16px; }
+  .sec-h .n { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent);
+    line-height: 1; min-width: 1.4em; }
+  .sec-h h2 { font-size: 1.16rem; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+  .sec-h .ksa { margin-left: auto; font-family: var(--mono); font-size: .68rem; color: var(--faint);
+    letter-spacing: .04em; align-self: center; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); }
+
+  /* chips */
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--sans);
+    font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    background: var(--sv-soft); color: var(--sv); white-space: nowrap; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sv); flex: none; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .86rem; margin: 4px 0; }
+  .scroll { overflow-x: auto; }
+  th { text-align: left; font-size: .64rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted); padding: 8px 10px;
+    border-bottom: 1.5px solid var(--rule-strong); white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: var(--mono); }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  a:hover { border-bottom-style: solid; }
+
+  /* signal list */
+  ul.sig { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  ul.sig li { display: flex; align-items: baseline; gap: 11px; padding: 9px 12px;
+    background: var(--sv-soft); border-radius: 7px; border: 1px solid var(--rule); }
+  ul.sig .tag { font-family: var(--mono); font-size: .66rem; color: var(--accent);
+    background: var(--accent-soft); border-radius: 4px; padding: 1px 6px; white-space: nowrap; align-self: center; }
+  ul.sig .t { flex: 1; font-size: .92rem; }
+  ul.sig a { font-family: var(--mono); font-size: .72rem; white-space: nowrap; }
+
+  /* key risks */
+  .kr { border: 1px solid var(--rule); border-radius: 9px; padding: 18px 20px; margin-bottom: 14px;
+    position: relative; background: var(--sheet); }
+  .kr.sig { border-left: 4px solid var(--accent); }
+  .kr .kh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .kr h3 { font-size: 1.04rem; font-weight: 700; margin: 0 0 2px; line-height: 1.4; }
+  .kr .rid { font-family: var(--mono); font-size: .68rem; color: var(--faint); }
+  .kr .flag { font-family: var(--sans); font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 2px 8px; }
+  .kr .rat { color: var(--muted); font-size: .9rem; margin: 9px 0 12px; }
+  .kr .meta-row { display: grid; grid-template-columns: 5.5em 1fr; gap: 3px 12px; font-size: .86rem;
+    margin-bottom: 10px; }
+  .kr .meta-row dt { color: var(--faint); font-size: .74rem; padding-top: 2px; }
+  .kr .meta-row dd { margin: 0; }
+  .kr .std { font-family: var(--mono); font-size: .78rem; }
+  .kr .procs { margin: 0; padding: 0; list-style: none; border-top: 1px dashed var(--rule); padding-top: 10px; }
+  .kr .procs li { font-size: .85rem; margin-bottom: 5px; padding-left: 16px; position: relative; }
+  .kr .procs li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+  .kr .procs .pid { font-family: var(--mono); font-size: .72rem; color: var(--accent); font-weight: 600; }
+
+  .flow { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+  .flow b { color: var(--accent); }
+  .mult { font-family: var(--mono); font-weight: 700; color: var(--accent); }
+
+  /* formal disclaimer notice */
+  .notice { font-family: var(--serif); font-size: 1rem; line-height: 1.7; color: var(--ink);
+    background: var(--accent-soft); border: 1px solid var(--rule-strong);
+    border-left: 4px solid var(--accent); border-radius: 8px; padding: 20px 24px; margin-top: 8px; }
+  .notice strong { font-weight: 700; }
+
+  .colophon { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: .68rem; color: var(--faint); line-height: 1.7; }
+
+  @page { margin: 14mm 12mm; }
+  @media print {
+    /* 인쇄는 항상 라이트 팔레트 고정(다크 환경에서도 흰 종이) */
+    :root {
+      --paper: #fff; --sheet: #fff; --ink: #191d26; --muted: #56606f; --faint: #8b94a2;
+      --rule: #dde2ea; --rule-strong: #c6cedb; --accent: #1f3a5f; --accent-soft: #e9eef6;
+      --red: #b23a2e; --red-soft: #f7e7e4; --amber: #946207; --amber-soft: #f6edd4;
+      --green: #2b7a50; --green-soft: #e2f0e8;
+    }
+    html, body { background: #fff; }
+    /* 신호등 칩·강조 배경색을 인쇄에 보존 */
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet { box-shadow: none; border: none; max-width: none; margin: 0; padding: 0; }
+    .controls { display: none; }
+    /* 섹션은 여러 페이지로 자연스럽게 흐르게(통짜 avoid 금지 → 하단 잘림 방지) */
+    section { break-inside: auto; }
+    .sec-h { break-after: avoid; }
+    /* 표·네모박스는 통째로 한 페이지에(중간에서 페이지 분리 금지) */
+    .kr, .stat, .notice, .card,
+    table, .scroll, .summary, .meta, dl.meta-row,
+    .sig li, tr { break-inside: avoid; }
+    /* 표·리스트 바로 앞 라벨(섹션 헤더·소제목)이 페이지 끝에 홀로 남지 않게 */
+    .sec-h, h2, h3 { break-after: avoid; }
+    /* 가로 스크롤 컨테이너는 인쇄 시 전체 표시(가로 잘림 방지) */
+    .scroll { overflow: visible; }
+    thead { display: table-header-group; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="letterhead">
+    <div class="wm"><small>DART · 감사 위험평가</small>SMART-RA</div>
+    <div class="controls">
+      <button class="btn" id="themeBtn" type="button">◐ 테마</button>
+      <button class="btn" id="printBtn" type="button">⎙ 인쇄 / PDF</button>
+    </div>
+  </div>
+
+  <div class="doctitle">위험평가 메모<span class="draft-mark">초안 · DRAFT</span></div>
+  <div class="docsub">아모레퍼시픽 — 2025 회계연도 감사계획 위험평가 (감사기준서 315·240·570)</div>
+
+  <dl class="meta">
+    <div><dt>대상회사</dt><dd>아모레퍼시픽</dd></div>
+    <div><dt>고유번호 / 종목</dt><dd>00583424 · 090430</dd></div>
+    <div><dt>산업 (KSIC)</dt><dd>20423 화장품 제조</dd></div>
+    <div><dt>회계연도</dt><dd>FY2025</dd></div>
+  </dl>
+
+  
+  <div class="summary">
+    <div class="stat hero">
+      <div class="lbl">유의적 위험 후보</div>
+      <div class="big">3<span class="unit"> 건</span></div>
+      <div class="sub">경영진 통제무력화·수익인식 등 상시 유의적 위험 포함 (KSA 240)</div>
+    </div>
+    <div class="stat">
+      <div class="lbl">핵심위험 (교차검증)</div>
+      <div class="big">3<span class="unit"> 건</span></div>
+      <div class="sub">공시·산업·재무 신호 교차검증 (모듈 4)</div>
+    </div>
+    <div class="stat gc s-GREEN">
+      <div class="lbl">계속기업 위험점수 (모듈 3)</div>
+      <div class="big">🟢 0.0<span class="unit"> / 100 · GREEN</span></div>
+      <div class="sub">재무 기반 계속기업 불확실성만 반영</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-h"><span class="n">1</span><h2>핵심위험 및 유의적 위험</h2><span class="ksa">모듈 4 · 교차검증</span></div>
+    <p class="lead">공시(모듈1)·산업(모듈2)·재무(모듈3) 신호를 교차검증하여 도출한 핵심위험 <strong>3건</strong>,
+    그중 <strong>유의적 위험 후보 3건</strong>. 경영진의 내부통제 무력화(KSA 240 문단 31)와 수익인식(부정 추정)은
+    회사의 재무건전성·계속기업 점수와 <strong>무관하게 상시 유의적 위험</strong>으로 본다. 따라서 계속기업 위험점수가
+    0점(재무 양호)이더라도 아래 유의적 위험은 존재한다. 유의적 위험 후보를 먼저 제시한다.</p>
+    
+    <div class="kr sig">
+      <div class="kh">
+        <div><h3>경영진의 내부통제 무력화 위험</h3><span class="rid">XV-BASE-01 · 기여신호 0건</span></div>
+        <span class="flag">유의적 위험 후보</span>
+      </div>
+      <div class="rat">KSA 240 문단 31에 따라 경영진의 통제무력화 위험은 모든 감사에서 유의적 위험으로 간주한다.</div>
+      <dl class="meta-row">
+        <dt>계정</dt><dd>수동전표, 회계추정치, 비경상 거래</dd>
+        <dt>경영진 주장</dt><dd>발생사실, 정확성, 기간귀속</dd>
+        <dt>기준서</dt><dd class="std">KSA 240</dd>
+      </dl>
+      
+      <ul class="procs">
+        
+        <li><span class="pid">PROC-240-01</span> — 경영진 통제무력화 대응 — 분개테스트: 회계기간 전반의 분개 및 기타 수정사항 중 비경상·수동·기말임박 전표를 추출하여 적정성을 검증한다(JET 연동).</li>
+        
+      </ul>
+    </div>
+    
+    <div class="kr sig">
+      <div class="kh">
+        <div><h3>[산업] 매출(반품·에누리·채널 변동대가) — 면세·방판·온라인·중국 등 채널별 반품권·에누리·판매장려금 등 변동대가 추정 오류 및 채널 거래구조 변경에 따른 총액/순액·기간귀속 왜곡</h3><span class="rid">COSM-R01 · 기여신호 1건</span></div>
+        <span class="flag">유의적 위험 후보</span>
+      </div>
+      <div class="rat">화장품 제조 산업 고유 위험</div>
+      <dl class="meta-row">
+        <dt>계정</dt><dd>매출(반품·에누리·채널 변동대가)</dd>
+        <dt>경영진 주장</dt><dd>발생사실, 정확성, 기간귀속</dd>
+        <dt>기준서</dt><dd class="std">K-IFRS 1115, KSA 540, KSA 240</dd>
+      </dl>
+      
+      <ul class="procs">
+        
+        <li><span class="pid">PROC-1115-06</span> — 변동대가 추정(반품·포인트): 반품·고객보상 이력 데이터에 기반한 변동대가 추정의 합리성을 검토한다.</li>
+        
+        <li><span class="pid">PROC-1115-03</span> — 매출 기간귀속(cut-off): 기말 전후 출하·인도 증빙과 매출인식 시점을 대조하여 조기·가공 매출을 검토한다.</li>
+        
+        <li><span class="pid">PROC-240-01</span> — 경영진 통제무력화 대응 — 분개테스트: 회계기간 전반의 분개 및 기타 수정사항 중 비경상·수동·기말임박 전표를 추출하여 적정성을 검증한다(JET 연동).</li>
+        
+      </ul>
+    </div>
+    
+    <div class="kr sig">
+      <div class="kh">
+        <div><h3>[산업] 영업권·무형자산(브랜드) — 브랜드·자회사 인수(사업결합)에서 인식한 영업권·브랜드의 현금창출단위 배분 및 손상 검사 추정(할인율·성장률) 오류</h3><span class="rid">COSM-R03 · 기여신호 1건</span></div>
+        <span class="flag">유의적 위험 후보</span>
+      </div>
+      <div class="rat">화장품 제조 산업 고유 위험</div>
+      <dl class="meta-row">
+        <dt>계정</dt><dd>영업권·무형자산(브랜드)</dd>
+        <dt>경영진 주장</dt><dd>실재성, 평가, 표시와 공시</dd>
+        <dt>기준서</dt><dd class="std">K-IFRS 1036, K-IFRS 1103, KSA 540</dd>
+      </dl>
+      
+      <ul class="procs">
+        
+        <li><span class="pid">PROC-1036-01</span> — 자산손상 검토: 손상징후를 식별하고 회수가능액 추정(현금창출단위)의 가정을 검토한다.</li>
+        
+        <li><span class="pid">PROC-540-01</span> — 회계추정치 감사 — 진행률/추정: 경영진의 추정 방법·가정·데이터의 합리성을 평가하고 추정 불확실성 및 경영진 편의(management bias) 징후를 검토한다.</li>
+        
+      </ul>
+    </div>
+    
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">2</span><h2>개요</h2></div>
+    <p class="lead">본 메모는 아모레퍼시픽(2025 회계연도)를 대상으로 공시(모듈1)·산업(모듈2)·재무(모듈3)
+    신호를 교차검증하여 도출한 감사계획 단계의 위험평가 <strong>초안</strong>이다. 판정은 서버측 결정론 룰·산식으로 산출되었으며,
+    각 신호는 원문 근거(rcept_no)와 룰 버전·데이터 스냅샷을 함께 보유한다(재현성).</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">3</span><h2>위험신호 요약</h2><span class="ksa">모듈 1·2·3</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>모듈</th><th class="num">🔴 RED</th><th class="num">🟡 YELLOW</th><th class="num">🟢 GREEN</th></tr></thead>
+      <tbody>
+        <tr><td>M1 공시 위험신호</td><td class="num">0</td><td class="num">4</td><td class="num">0</td></tr>
+        <tr><td>M2 산업 위험매핑</td><td class="num">0</td><td class="num">3</td><td class="num">1</td></tr>
+        <tr><td>M3 계속기업</td><td class="num">0</td><td class="num">0</td><td class="num">1</td></tr>
+      </tbody>
+    </table></div>
+    <ul class="sig" style="margin-top:14px">
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M1·EXTERNAL_NEWS</span>
+        <span class="t">외부 기사: 아모레퍼시픽 헤라, 식약처 광고업무정지 2개월 처분 [키워드 &#39;제재&#39;]</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M1·EXTERNAL_NEWS</span>
+        <span class="t">외부 기사: 계열사 부당지원 아모레퍼시픽 과징금 부과(공정위) [키워드 &#39;과징금&#39;]</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M1·EXTERNAL_NEWS</span>
+        <span class="t">외부 기사: 아모레퍼시픽, 코스알엑스 7,551억 추가인수…지분 93.2% 자회사 편입</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M1·EXTERNAL_NEWS</span>
+        <span class="t">외부 기사: 아모레퍼시픽 2024년 중국 매출 27% 감소…면세·채널 부진</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M2·REVIEW_PRECEDENT</span>
+        <span class="t">감리지적 선례: 연결매출액 및 매출원가 과대계상(내부거래 미제거) (계정 연결매출·매출원가)</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M2·REVIEW_PRECEDENT</span>
+        <span class="t">감리지적 선례: 미수금 및 재고자산에 대한 충당금 미계상 (계정 재고자산·미수금)</span>
+        
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">M2·REVIEW_PRECEDENT</span>
+        <span class="t">감리지적 선례: 재고자산평가손실 과소계상 (계정 재고자산)</span>
+        
+      </li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">4</span><h2>계속기업 평가</h2><span class="ksa">KSA 570 · 부록 B</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>지표</th><th>판정</th><th>근거 문장</th><th>KSA 570 A3</th></tr></thead>
+      <tbody>
+        
+        <tr><td><strong>영업현금흐름 추세</strong></td>
+          <td><span class="chip s-GREEN"><span class="dot"></span>GREEN</span></td>
+          <td>영업활동현금흐름 양호</td><td style="color:var(--muted)">영업활동 순현금유출 지속</td></tr>
+        
+        <tr><td><strong>자본잠식</strong></td>
+          <td><span class="chip s-GREEN"><span class="dot"></span>GREEN</span></td>
+          <td>자본잠식 없음</td><td style="color:var(--muted)">자본잠식</td></tr>
+        
+        <tr><td><strong>부채비율</strong></td>
+          <td><span class="chip s-GREEN"><span class="dot"></span>GREEN</span></td>
+          <td>부채비율 26%</td><td style="color:var(--muted)">과도한 재무 레버리지</td></tr>
+        
+        <tr><td><strong>유동비율</strong></td>
+          <td><span class="chip s-GREEN"><span class="dot"></span>GREEN</span></td>
+          <td>유동비율 179%</td><td style="color:var(--muted)">단기 유동성 부족</td></tr>
+        
+        <tr><td><strong>이자보상배율</strong></td>
+          <td><span class="chip s-GREEN"><span class="dot"></span>GREEN</span></td>
+          <td>이자보상배율 양호</td><td style="color:var(--muted)">차입금 상환 능력 저하</td></tr>
+        
+      </tbody>
+    </table></div>
+    
+    <p class="lead" style="margin-top:18px;font-size:.8rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)">주요 재무 추이 (백만원)</p>
+    <div class="scroll"><table>
+      <thead><tr><th>연도</th><th class="num">매출액</th><th class="num">영업이익</th><th class="num">영업현금흐름</th><th class="num">부채총계</th><th class="num">자본총계</th></tr></thead>
+      <tbody>
+        
+        <tr><td class="mono">2021</td>
+          <td class="num">4,863,128</td><td class="num">343,358</td>
+          <td class="num">691,434</td><td class="num">1,372,414</td>
+          <td class="num">4,744,300</td></tr>
+        
+        <tr><td class="mono">2022</td>
+          <td class="num">4,134,933</td><td class="num">214,233</td>
+          <td class="num">151,024</td><td class="num">1,022,508</td>
+          <td class="num">4,779,275</td></tr>
+        
+        <tr><td class="mono">2023</td>
+          <td class="num">3,673,964</td><td class="num">108,171</td>
+          <td class="num">348,228</td><td class="num">1,013,806</td>
+          <td class="num">4,872,705</td></tr>
+        
+        <tr><td class="mono">2024</td>
+          <td class="num">3,885,111</td><td class="num">220,481</td>
+          <td class="num">334,510</td><td class="num">1,457,500</td>
+          <td class="num">5,326,008</td></tr>
+        
+        <tr><td class="mono">2025</td>
+          <td class="num">4,252,820</td><td class="num">335,827</td>
+          <td class="num">583,840</td><td class="num">1,457,756</td>
+          <td class="num">5,503,458</td></tr>
+        
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">5</span><h2>부정위험 고려</h2><span class="ksa">KSA 240</span></div>
+    <p><strong>경영진의 내부통제 무력화 위험은 상시 유의적 위험으로 간주</strong>한다(KSA 240 문단 31). 관련 부정 신호:</p>
+    <ul class="sig">
+      
+      <li class="s-GREEN"><span class="t" style="color:var(--muted)">탐지된 부정 관련 RED 키워드 없음. 분개테스트(JET) 연동은 7절 참조.</span></li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">6</span><h2>산업 고유 위험 점검</h2><span class="ksa">모듈 2</span></div>
+    
+    <p class="lead">산업: <strong>화장품 제조</strong> (KSIC 접두 204)</p>
+    <div class="scroll"><table>
+      <thead><tr><th>위험 ID</th><th>고위험 계정</th><th>이슈</th><th>기준서</th></tr></thead>
+      <tbody>
+        
+        <tr><td class="mono">COSM-R01</td>
+          <td>매출(반품·에누리·채널 변동대가)</td><td>면세·방판·온라인·중국 등 채널별 반품권·에누리·판매장려금 등 변동대가 추정 오류 및 채널 거래구조 변경에 따른 총액/순액·기간귀속 왜곡</td>
+          <td class="std">K-IFRS 1115, KSA 540, KSA 240</td></tr>
+        
+        <tr><td class="mono">COSM-R02</td>
+          <td>재고자산(유행·유통기한 민감)</td><td>트렌드 변화·사용기한 임박·단종 품목의 순실현가능가치 하락에 대한 평가손실(진부화) 미반영</td>
+          <td class="std">K-IFRS 1002, KSA 501, KSA 540</td></tr>
+        
+        <tr><td class="mono">COSM-R03</td>
+          <td>영업권·무형자산(브랜드)</td><td>브랜드·자회사 인수(사업결합)에서 인식한 영업권·브랜드의 현금창출단위 배분 및 손상 검사 추정(할인율·성장률) 오류</td>
+          <td class="std">K-IFRS 1036, K-IFRS 1103, KSA 540</td></tr>
+        
+        <tr><td class="mono">COSM-R04</td>
+          <td>특수관계자 거래·연결 내부거래</td><td>계열사·해외 종속회사와의 내부거래 미제거 및 특수관계자 지원성 거래의 공시 누락</td>
+          <td class="std">K-IFRS 1110, K-IFRS 1024, KSA 550</td></tr>
+        
+      </tbody>
+    </table></div>
+    <p class="lead" style="font-size:.78rem;margin-top:8px">★ 전기 핵심감사사항(KAM)과 일치하는 항목 — 당기 중점검토 영역.</p>
+    
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">7</span><h2>외부 공개정보 · 감리 선례</h2><span class="ksa">모듈 1·2 · 외부(비신뢰)</span></div>
+    
+    
+    <p class="lead">DART 정형 데이터 밖의 외부 공개정보다. <strong>기사</strong>는 에이전트가 WebSearch로, <strong>감리지적 선례</strong>는
+    금감원 감리사례에서 수집한 것으로, 모두 <strong>외부 유래(비신뢰)</strong>라 판정을 자동 확정하지 않는다 — 감사인이 수동으로 확인한다.</p>
+    <p class="lead" style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)">외부 기사 4건</p>
+    <ul class="sig">
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">비신뢰</span>
+        <span class="t">외부 기사: 아모레퍼시픽 헤라, 식약처 광고업무정지 2개월 처분 [키워드 &#39;제재&#39;] · 네이트/뉴스 (2025-01-20)</span>
+        <a href="https://news.nate.com/view/20250120n10334" target="_blank" rel="noopener">원문 ↗</a>
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">비신뢰</span>
+        <span class="t">외부 기사: 계열사 부당지원 아모레퍼시픽 과징금 부과(공정위) [키워드 &#39;과징금&#39;] · 한국경제 (2020-04-06)</span>
+        <a href="https://www.hankyung.com/economy/article/202004069551g" target="_blank" rel="noopener">원문 ↗</a>
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">비신뢰</span>
+        <span class="t">외부 기사: 아모레퍼시픽, 코스알엑스 7,551억 추가인수…지분 93.2% 자회사 편입 · 블로터 (2024-05-13)</span>
+        <a href="https://www.bloter.net/news/articleView.html?idxno=635927" target="_blank" rel="noopener">원문 ↗</a>
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">비신뢰</span>
+        <span class="t">외부 기사: 아모레퍼시픽 2024년 중국 매출 27% 감소…면세·채널 부진 · 팜뉴스 (2025-02-06)</span>
+        <a href="https://www.pharmnews.com/news/articleView.html?idxno=238987" target="_blank" rel="noopener">원문 ↗</a>
+      </li>
+      
+    </ul>
+    <p class="lead" style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:14px">감리지적 선례 3건</p>
+    <ul class="sig">
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">K-IFRS 1110, K-IFRS 1103</span>
+        <span class="t">감리지적 선례: 연결매출액 및 매출원가 과대계상(내부거래 미제거) (계정 연결매출·매출원가) · 공개번호 FSS/2008-31 · 2015</span>
+        <a href="https://www.fss.or.kr/fss/cmmn/file/fileDown.do?menuNo=200448&amp;atchFileId=354d041b2818cd708053a6466aa24db3&amp;fileSn=1&amp;bbsId=" target="_blank" rel="noopener">사례 ↗</a>
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">K-IFRS 1002, K-IFRS 1109</span>
+        <span class="t">감리지적 선례: 미수금 및 재고자산에 대한 충당금 미계상 (계정 재고자산·미수금) · 공개번호 FSS/1912-9 · 2019</span>
+        <a href="https://www.fss.or.kr/fss/cmmn/file/fileDown.do?menuNo=200448&amp;atchFileId=2ac593c20397d2d143563398a7929571&amp;fileSn=1&amp;bbsId=" target="_blank" rel="noopener">사례 ↗</a>
+      </li>
+      
+      <li class="s-YELLOW">
+        <span class="chip s-YELLOW"><span class="dot"></span>YELLOW</span>
+        <span class="tag">K-IFRS 1002</span>
+        <span class="t">감리지적 선례: 재고자산평가손실 과소계상 (계정 재고자산) · 공개번호 FSS-51374 · 2018</span>
+        
+      </li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">8</span><h2>전표분석(JET) 연동</h2><span class="flow"><b>KSA 315</b> 위험평가 → <b>KSA 240</b> 분개테스트</span></div>
+    
+    <div class="scroll"><table>
+      <thead><tr><th>JET 룰</th><th class="num">가중치</th><th>사유</th><th>원천 핵심위험</th></tr></thead>
+      <tbody>
+        
+        <tr><td class="mono">JE-GEN-01</td><td class="num"><span class="mult">×1.2</span></td>
+          <td>KSA 240 상시 통제무력화 대응</td><td style="color:var(--muted)">경영진의 내부통제 무력화 위험</td></tr>
+        
+        <tr><td class="mono">JE-COSM-01</td><td class="num"><span class="mult">×1.0</span></td>
+          <td>기말 반품·에누리 충당부채 환입 전표</td><td style="color:var(--muted)">[산업] 매출(반품·에누리·채널 변동대가) — 면세·방판·온라인·중국 등 채널별 반품권·에누리·판매장려금 등 변동대가 추정 오류 및 채널 거래구조 변경에 따른 총액/순액·기간귀속 왜곡</td></tr>
+        
+        <tr><td class="mono">JE-COSM-02</td><td class="num"><span class="mult">×1.0</span></td>
+          <td>기말 임박 대량 채널 매출전표</td><td style="color:var(--muted)">[산업] 매출(반품·에누리·채널 변동대가) — 면세·방판·온라인·중국 등 채널별 반품권·에누리·판매장려금 등 변동대가 추정 오류 및 채널 거래구조 변경에 따른 총액/순액·기간귀속 왜곡</td></tr>
+        
+        <tr><td class="mono">JE-COSM-04</td><td class="num"><span class="mult">×1.0</span></td>
+          <td>영업권·무형자산 손상·환입 수동 전표</td><td style="color:var(--muted)">[산업] 영업권·무형자산(브랜드) — 브랜드·자회사 인수(사업결합)에서 인식한 영업권·브랜드의 현금창출단위 배분 및 손상 검사 추정(할인율·성장률) 오류</td></tr>
+        
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">9</span><h2>기타 관찰사항 · 수동확인 목록</h2></div>
+    <ul class="sig">
+      
+      <li class="s-YELLOW"><span class="chip s-YELLOW"><span class="dot"></span>warning</span><span class="t">auditor_change_history: 감사인 변경 이력·전기 KAM 상세는 감사보고서 원문 파싱 필요(별도 파서). 수동확인 권장</span></li>
+      
+    </ul>
+    <p class="lead" style="font-size:.85rem;margin-top:10px">데이터 한계: 본 분석은 DART 공개 공시·재무 데이터에 한한다. 감사보고서의 비정형 항목(전기 KAM 상세·계속기업 불확실성 문단·특수관계자)은 원문 파싱 범위를 벗어나므로 별도로 수동 확인해야 한다.</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">10</span><h2>한계 및 면책</h2></div>
+    <div class="notice">본 메모는 DART 공시 등 공개정보를 기반으로 시스템이 자동 생성한 <strong>초안(draft)</strong>이다. 본 초안은 감사인의 전문가적 판단과 직업적 회의주의를 대체하지 않으며, <strong>위험평가에 대한 최종 판단, 유의적 위험의 결정, 감사절차의 성격·시기·범위 결정은 업무수행이사와 감사팀이 수행한다.</strong> 시스템 산출물을 이용하는 경우 감사기준서 500에 따라 정보의 목적적합성과 신뢰성을 평가하여야 한다.</div>
+  </section>
+
+  <div class="colophon">
+    SMART-RA · DART 공시 기반 감사 위험평가 자동화 (참조구현) · 룰 risk-rules@0.1.0 · 스냅샷 SNAP-a566534288d8<br>
+    본 문서의 모든 신호와 핵심위험은 원문 근거와 버전 메타를 갖추고 있어 동일 스냅샷·룰에서 재현할 수 있다.
+  </div>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const cur = () => root.getAttribute('data-theme') || (mq.matches ? 'dark' : 'light');
+  const tb = document.getElementById('themeBtn');
+  tb.textContent = cur() === 'dark' ? '◑ 라이트' : '◐ 다크';
+  tb.addEventListener('click', () => {
+    const n = cur() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', n);
+    tb.textContent = n === 'dark' ? '◑ 라이트' : '◐ 다크';
+  });
+  document.getElementById('printBtn').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>

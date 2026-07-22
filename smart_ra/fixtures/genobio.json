@@ -1,0 +1,64 @@
+{
+  "corp_code": "90000003",
+  "corp_name": "제노바이오",
+  "stock_code": "900003",
+  "ksic_code": "21102",
+  "disclosures": [
+    {
+      "rcept_no": "20240328000102",
+      "report_nm": "사업보고서 (2023.12)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240328",
+      "corrected": false,
+      "body": "신약 파이프라인 임상 개발 단계 기업. 상용화 이전 단계로 매출은 미미하며 연구개발비 지출이 계속되고 있습니다."
+    },
+    {
+      "rcept_no": "20240328000401",
+      "report_nm": "감사보고서제출",
+      "pblntf_ty": "F",
+      "rcept_dt": "20240328",
+      "corrected": false,
+      "body": "외부감사인의 감사보고서. 감사의견 적정. 핵심감사사항으로 개발비 자산화 및 라이선스아웃 수익 인식을 선정."
+    },
+    {
+      "rcept_no": "20240705000601",
+      "report_nm": "유상증자결정",
+      "pblntf_ty": "I",
+      "rcept_dt": "20240705",
+      "corrected": false,
+      "body": "운영자금 및 임상시험 자금 조달을 위한 제3자배정 유상증자를 결정하였습니다."
+    }
+  ],
+  "audits": [
+    {"fiscal_year": 2020, "auditor": "미래회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["개발비 자산화"], "audit_fee": 90, "non_audit_fee": 10,
+     "rcept_no": "20210328000001"},
+    {"fiscal_year": 2021, "auditor": "미래회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["개발비 자산화"], "audit_fee": 95, "non_audit_fee": 10,
+     "rcept_no": "20220328000001"},
+    {"fiscal_year": 2022, "auditor": "미래회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["개발비 자산화", "라이선스아웃 수익 인식"], "audit_fee": 100, "non_audit_fee": 12,
+     "rcept_no": "20230328000001"},
+    {"fiscal_year": 2023, "auditor": "미래회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["개발비 자산화", "라이선스아웃 수익 인식"], "audit_fee": 110, "non_audit_fee": 15,
+     "rcept_no": "20240328000401"}
+  ],
+  "financials": [
+    {"year": 2020, "basis": "CFS", "revenue": 0, "operating_income": -15000, "interest_expense": 0,
+     "operating_cash_flow": -12000, "current_assets": 60000, "current_liabilities": 5000,
+     "total_assets": 88000, "total_liabilities": 8000, "total_equity": 80000, "capital_stock": 20000, "cash": 55000},
+    {"year": 2021, "basis": "CFS", "revenue": 0, "operating_income": -18000, "interest_expense": 0,
+     "operating_cash_flow": -15000, "current_assets": 90000, "current_liabilities": 6000,
+     "total_assets": 120000, "total_liabilities": 10000, "total_equity": 110000, "capital_stock": 22000, "cash": 85000},
+    {"year": 2022, "basis": "CFS", "revenue": 500, "operating_income": -20000, "interest_expense": 100,
+     "operating_cash_flow": -18000, "current_assets": 70000, "current_liabilities": 7000,
+     "total_assets": 102000, "total_liabilities": 12000, "total_equity": 90000, "capital_stock": 22000, "cash": 65000},
+    {"year": 2023, "basis": "CFS", "revenue": 800, "operating_income": -22000, "interest_expense": 100,
+     "operating_cash_flow": -20000, "current_assets": 55000, "current_liabilities": 8000,
+     "total_assets": 84000, "total_liabilities": 14000, "total_equity": 70000, "capital_stock": 22000, "cash": 48000},
+    {"year": 2024, "basis": "CFS", "revenue": 1200, "operating_income": -25000, "interest_expense": 200,
+     "operating_cash_flow": -24000, "current_assets": 40000, "current_liabilities": 9000,
+     "total_assets": 66000, "total_liabilities": 16000, "total_equity": 50000, "capital_stock": 22000, "cash": 34000}
+  ],
+  "parse_issues": []
+}

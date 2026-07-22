@@ -1,0 +1,14 @@
+# Vercel 정적 배포에는 web/ 만 필요 — 나머지는 업로드 제외(용량·오탐 방지)
+.venv/
+venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.git/
+output/
+tests/
+scripts/
+smart_ra/
+pyproject.toml
+codex_*.txt
+RFP_v1.0_audit-risk-platform.md

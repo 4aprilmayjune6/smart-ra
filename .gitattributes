@@ -1,0 +1,8 @@
+# 저장소 내부는 LF로 정규화(크로스플랫폼 일관성). 체크아웃 시 OS 기본을 따른다.
+* text=auto eol=lf
+
+# 바이너리 — 정규화/디프 제외
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary

@@ -1,0 +1,64 @@
+{
+  "corp_code": "90000002",
+  "corp_name": "대양제조",
+  "stock_code": "900002",
+  "ksic_code": "29120",
+  "disclosures": [
+    {
+      "rcept_no": "20240329000102",
+      "report_nm": "사업보고서 (2023.12)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240329",
+      "corrected": false,
+      "body": "제30기 사업보고서. 산업기계 제조 및 판매. 안정적 영업실적을 시현하였습니다."
+    },
+    {
+      "rcept_no": "20240329000401",
+      "report_nm": "감사보고서제출",
+      "pblntf_ty": "F",
+      "rcept_dt": "20240329",
+      "corrected": false,
+      "body": "외부감사인의 감사보고서. 감사의견 적정. 핵심감사사항으로 재고자산 평가를 선정."
+    },
+    {
+      "rcept_no": "20240510000501",
+      "report_nm": "현금ㆍ현물배당결정",
+      "pblntf_ty": "I",
+      "rcept_dt": "20240510",
+      "corrected": false,
+      "body": "이사회는 보통주 1주당 현금배당을 결의하였습니다."
+    }
+  ],
+  "audits": [
+    {"fiscal_year": 2020, "auditor": "한결회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["재고자산 평가"], "audit_fee": 180, "non_audit_fee": 20,
+     "rcept_no": "20210329000001"},
+    {"fiscal_year": 2021, "auditor": "한결회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["재고자산 평가"], "audit_fee": 185, "non_audit_fee": 20,
+     "rcept_no": "20220329000001"},
+    {"fiscal_year": 2022, "auditor": "한결회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["재고자산 평가"], "audit_fee": 190, "non_audit_fee": 25,
+     "rcept_no": "20230329000001"},
+    {"fiscal_year": 2023, "auditor": "한결회계법인", "opinion": "적정", "change_type": "designated",
+     "going_concern_para": false, "kam": ["재고자산 평가", "매출인식"], "audit_fee": 210, "non_audit_fee": 25,
+     "rcept_no": "20240329000401"}
+  ],
+  "financials": [
+    {"year": 2020, "basis": "CFS", "revenue": 800000, "operating_income": 80000, "interest_expense": 5000,
+     "operating_cash_flow": 70000, "current_assets": 400000, "current_liabilities": 200000,
+     "total_assets": 950000, "total_liabilities": 350000, "total_equity": 600000, "capital_stock": 50000, "cash": 100000},
+    {"year": 2021, "basis": "CFS", "revenue": 850000, "operating_income": 90000, "interest_expense": 5000,
+     "operating_cash_flow": 85000, "current_assets": 420000, "current_liabilities": 210000,
+     "total_assets": 1020000, "total_liabilities": 360000, "total_equity": 660000, "capital_stock": 50000, "cash": 120000},
+    {"year": 2022, "basis": "CFS", "revenue": 900000, "operating_income": 95000, "interest_expense": 4500,
+     "operating_cash_flow": 90000, "current_assets": 450000, "current_liabilities": 220000,
+     "total_assets": 1090000, "total_liabilities": 370000, "total_equity": 720000, "capital_stock": 50000, "cash": 140000},
+    {"year": 2023, "basis": "CFS", "revenue": 950000, "operating_income": 100000, "interest_expense": 4000,
+     "operating_cash_flow": 100000, "current_assets": 480000, "current_liabilities": 230000,
+     "total_assets": 1180000, "total_liabilities": 380000, "total_equity": 800000, "capital_stock": 50000, "cash": 160000},
+    {"year": 2024, "basis": "CFS", "revenue": 1000000, "operating_income": 110000, "interest_expense": 4000,
+     "operating_cash_flow": 120000, "current_assets": 520000, "current_liabilities": 250000,
+     "total_assets": 1300000, "total_liabilities": 400000, "total_equity": 900000, "capital_stock": 50000, "cash": 200000}
+  ],
+  "parse_issues": []
+}

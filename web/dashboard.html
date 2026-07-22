@@ -1,0 +1,2356 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART-RA 감사 위험평가 대시보드</title>
+<style>
+  :root {
+    --sans: system-ui, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", Pretendard, Roboto, sans-serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, "D2Coding", monospace;
+
+    --fs-xs: .72rem; --fs-sm: .8rem; --fs-base: .92rem; --fs-md: 1.02rem;
+    --fs-lg: 1.3rem; --fs-xl: 1.9rem; --fs-2xl: 2.7rem;
+
+    /* neutrals — cool paper, biased toward the ink accent */
+    --bg: #e9edf2;
+    --surface: #ffffff;
+    --surface-2: #f3f6fa;
+    --text: #151a23;
+    --muted: #5c6674;
+    --faint: #8a94a3;
+    --border: #d7dde6;
+    --border-strong: #c3ccd8;
+
+    /* accent — prussian ink */
+    --accent: #1f3a5f;
+    --accent-2: #2f5688;
+    --accent-soft: #e6edf6;
+    --on-accent: #ffffff;
+
+    /* semantic traffic-light (separate from accent) */
+    --red: #c0392b;   --red-bg: #f9e7e4;   --red-line: #d9695c;
+    --amber: #a9760c; --amber-bg: #f8efd8; --amber-line: #d6a63f;
+    --green: #2c7d51; --green-bg: #e2f0e8; --green-line: #5aab7f;
+
+    --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1016; --surface: #161b23; --surface-2: #1b212b;
+      --text: #e7ebf2; --muted: #9aa4b2; --faint: #6b7482;
+      --border: #262d3a; --border-strong: #333c4c;
+      --accent: #82a9da; --accent-2: #a7c3e6; --accent-soft: #1a2740; --on-accent: #0d1016;
+      --red: #e57160; --red-bg: #2b1613; --red-line: #b5493b;
+      --amber: #e0b04a; --amber-bg: #2a2110; --amber-line: #a57d24;
+      --green: #5fc089; --green-bg: #122419; --green-line: #327a52;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #e9edf2; --surface: #ffffff; --surface-2: #f3f6fa;
+    --text: #151a23; --muted: #5c6674; --faint: #8a94a3;
+    --border: #d7dde6; --border-strong: #c3ccd8;
+    --accent: #1f3a5f; --accent-2: #2f5688; --accent-soft: #e6edf6; --on-accent: #ffffff;
+    --red: #c0392b; --red-bg: #f9e7e4; --red-line: #d9695c;
+    --amber: #a9760c; --amber-bg: #f8efd8; --amber-line: #d6a63f;
+    --green: #2c7d51; --green-bg: #e2f0e8; --green-line: #5aab7f;
+    --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1016; --surface: #161b23; --surface-2: #1b212b;
+    --text: #e7ebf2; --muted: #9aa4b2; --faint: #6b7482;
+    --border: #262d3a; --border-strong: #333c4c;
+    --accent: #82a9da; --accent-2: #a7c3e6; --accent-soft: #1a2740; --on-accent: #0d1016;
+    --red: #e57160; --red-bg: #2b1613; --red-line: #b5493b;
+    --amber: #e0b04a; --amber-bg: #2a2110; --amber-line: #a57d24;
+    --green: #5fc089; --green-bg: #122419; --green-line: #327a52;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: var(--fs-base); line-height: 1.55;
+    -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 72px; }
+
+  /* masthead */
+  header.mast { display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; padding: 30px 0 20px; border-bottom: 2px solid var(--accent); }
+  .brand { display: flex; flex-direction: column; gap: 3px; }
+  .wordmark { font-family: var(--serif); font-size: var(--fs-2xl); font-weight: 600;
+    letter-spacing: -.01em; line-height: 1; color: var(--accent); }
+  .wordmark small { font-family: var(--sans); font-size: var(--fs-sm); font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
+    display: block; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: var(--fs-md); }
+  .mast-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .provenance { font-family: var(--mono); font-size: var(--fs-xs); color: var(--faint);
+    text-align: right; }
+  .provenance b { color: var(--muted); font-weight: 600; }
+  .toggle { font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border-strong); border-radius: 999px;
+    padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .eyebrow { font-family: var(--serif); font-style: italic; font-size: var(--fs-md);
+    color: var(--accent-2); margin: 34px 0 12px; display: flex; align-items: baseline; gap: 10px; }
+  .eyebrow .num { font-family: var(--mono); font-style: normal; font-size: var(--fs-xs);
+    letter-spacing: .1em; color: var(--faint); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1px 6px; }
+
+  /* portfolio cards */
+  .portfolio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .portfolio { grid-template-columns: 1fr; } }
+  .pcard { position: relative; text-align: left; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px 16px 22px;
+    cursor: pointer; box-shadow: var(--shadow); transition: transform .12s, border-color .12s;
+    overflow: hidden; font-family: inherit; color: inherit; }
+  .pcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+    background: var(--sev-line); }
+  .pcard:hover { transform: translateY(-2px); }
+  .pcard[aria-selected="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+  .pcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pcard .co { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em; }
+  .pcard .ind { color: var(--muted); font-size: var(--fs-sm); margin-bottom: 12px; }
+  .pcard .row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .sev-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 700;
+    font-size: var(--fs-sm); padding: 3px 10px; border-radius: 999px;
+    background: var(--sev-bg); color: var(--sev); }
+  .sev-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sev); flex: none; }
+  .pcard .score { font-family: var(--mono); font-size: var(--fs-xl); font-weight: 600;
+    color: var(--sev); font-variant-numeric: tabular-nums; line-height: 1; }
+  .pcard .score span { font-size: var(--fs-sm); color: var(--faint); }
+  .pcard .counts { display: flex; gap: 14px; margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed var(--border); font-size: var(--fs-xs); color: var(--muted); }
+  .pcard .counts b { font-family: var(--mono); color: var(--text); font-size: var(--fs-sm); }
+
+  /* detail panel */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 26px 28px; margin-top: 16px; }
+  .panel-head { display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .panel-head h2 { margin: 0; font-size: var(--fs-xl); letter-spacing: -.01em; }
+  .panel-head .meta { font-family: var(--mono); font-size: var(--fs-xs); color: var(--faint);
+    margin-top: 4px; }
+  .tag { display: inline-block; font-size: var(--fs-xs); color: var(--muted);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-right: 6px; }
+
+  /* score gauge */
+  .gauge-wrap { margin: 22px 0 8px; }
+  .gauge-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .gauge-top .lbl { font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }
+  .gauge-top .val { font-family: var(--mono); font-weight: 600; color: var(--sev);
+    font-variant-numeric: tabular-nums; }
+  .gauge { position: relative; height: 12px; border-radius: 999px; overflow: hidden;
+    background: linear-gradient(90deg,
+      var(--green-line) 0 40%, var(--amber-line) 40% 70%, var(--red-line) 70% 100%);
+    opacity: .35; }
+  .gauge-track { position: relative; height: 12px; border-radius: 999px; }
+  .gauge-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px;
+    background: var(--sev); }
+  .gauge-marks { position: relative; height: 16px; font-family: var(--mono); font-size: 10px;
+    color: var(--faint); }
+  .gauge-marks span { position: absolute; transform: translateX(-50%); top: 2px; }
+  .hardrule { margin-top: 12px; display: flex; align-items: center; gap: 9px;
+    background: var(--red-bg); color: var(--red); border: 1px solid var(--red-line);
+    border-radius: 8px; padding: 9px 13px; font-size: var(--fs-sm); font-weight: 600; }
+  .hardrule .k { font-family: var(--mono); font-size: var(--fs-xs); text-transform: uppercase;
+    letter-spacing: .08em; opacity: .8; }
+
+  h3.sec { font-size: var(--fs-md); font-weight: 700; margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 10px; }
+  h3.sec .rule { flex: 1; height: 1px; background: var(--border); }
+  h3.sec .k { font-family: var(--mono); font-size: var(--fs-xs); color: var(--faint);
+    font-weight: 500; }
+
+  /* indicator table */
+  .tbl-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: var(--fs-xs);
+    text-transform: uppercase; letter-spacing: .05em; padding: 8px 10px;
+    border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 700;
+    font-size: var(--fs-xs); padding: 2px 9px; border-radius: 999px;
+    background: var(--sev-bg); color: var(--sev); white-space: nowrap; }
+  .spark { display: block; }
+
+  /* signals */
+  .sig-groups { display: flex; flex-direction: column; gap: 8px; }
+  .sig { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
+  .sig .lead { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .sig .mod { font-family: var(--mono); font-size: var(--fs-xs); color: var(--accent);
+    background: var(--accent-soft); border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+  .sig .title { min-width: 0; }
+  .sig .title b { font-weight: 600; }
+  .sig a.ev { font-family: var(--mono); font-size: var(--fs-xs); color: var(--accent-2);
+    text-decoration: none; white-space: nowrap; border-bottom: 1px dotted var(--accent-2); }
+  .sig a.ev:hover { color: var(--accent); }
+  .untrusted { font-size: var(--fs-xs); color: var(--faint); font-style: italic; }
+
+  /* key risks */
+  .kr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .kr-grid { grid-template-columns: 1fr; } }
+  .kr { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px;
+    background: var(--surface); position: relative; }
+  .kr.sig::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px;
+    background: var(--accent); border-radius: 3px; }
+  .kr h4 { margin: 0 0 4px; font-size: var(--fs-base); font-weight: 700; line-height: 1.35;
+    padding-left: 10px; }
+  .kr .rid { font-family: var(--mono); font-size: var(--fs-xs); color: var(--faint); padding-left: 10px; }
+  .kr .flag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border-radius: 5px; padding: 1px 7px; margin-left: 6px;
+    vertical-align: middle; letter-spacing: .02em; }
+  .kr .rationale { color: var(--muted); font-size: var(--fs-sm); margin: 10px 0 12px; padding-left: 10px; }
+  .kr dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; padding-left: 10px;
+    font-size: var(--fs-sm); }
+  .kr dt { color: var(--faint); font-size: var(--fs-xs); white-space: nowrap; padding-top: 1px; }
+  .kr dd { margin: 0; }
+  .kr .std { font-family: var(--mono); font-size: var(--fs-xs); }
+  .kr ul { margin: 6px 0 0; padding-left: 16px; }
+  .kr ul li { margin-bottom: 3px; }
+
+  /* jet trace */
+  .flow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono);
+    font-size: var(--fs-xs); color: var(--muted); margin-left: auto; }
+  .flow b { color: var(--accent); }
+  .mult { font-family: var(--mono); font-weight: 700; color: var(--accent);
+    font-variant-numeric: tabular-nums; }
+
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border);
+    color: var(--faint); font-size: var(--fs-xs); }
+  footer .disc { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--amber-line);
+    border-radius: 8px; padding: 12px 15px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  footer code { font-family: var(--mono); color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <span class="wordmark"><small>DART · 감사 위험평가</small>SMART-RA</span>
+      <span class="subtitle">공시·산업·재무 신호를 교차검증한 감사계획 위험평가 <b>초안</b> — 판정은 서버 결정론 엔진</span>
+    </div>
+    <div class="mast-right">
+      <button class="toggle" id="themeBtn" type="button" aria-label="테마 전환">◐ 테마</button>
+      <div class="provenance" id="prov"></div>
+    </div>
+  </header>
+
+  <div class="eyebrow"><span class="num">01</span>포트폴리오 · 계속기업 신호등</div>
+  <div class="portfolio" id="portfolio" role="tablist" aria-label="회사 선택"></div>
+
+  <div id="detail"></div>
+
+  <footer>
+    <div class="disc" id="disclaimer"></div>
+    <div id="footmeta"></div>
+  </footer>
+</div>
+
+<script id="smartra-data" type="application/json">{
+ "companies": [
+  {
+   "corp_code": "90000001",
+   "name": "한빛건설",
+   "stock": "900001",
+   "ksic": "41210",
+   "industry": "건설업",
+   "year": 2024,
+   "snapshot": "SNAP-e261d6719336",
+   "rule_version": "risk-rules@0.1.0",
+   "gc": {
+    "engagement_id": "ENG-173d22ec7237",
+    "corp_code": "90000001",
+    "overall_severity": "RED",
+    "overall_score": 82.5,
+    "hard_rule_triggered": "전기 감사보고서 계속기업 관련 중요한 불확실성 문단",
+    "indicators": [
+     {
+      "name": "영업현금흐름 추세",
+      "values": {
+       "2020": 15000.0,
+       "2021": -5000.0,
+       "2022": -12000.0,
+       "2023": -18000.0,
+       "2024": -25000.0
+      },
+      "severity": "RED",
+      "score": 25.0,
+      "reason": "영업활동현금흐름 4년 연속 음수",
+      "ksa570_tag": "영업활동 순현금유출 지속"
+     },
+     {
+      "name": "자본잠식",
+      "values": {
+       "2024": 0.1
+      },
+      "severity": "YELLOW",
+      "score": 10.0,
+      "reason": "부분 자본잠식(잠식률 10%)",
+      "ksa570_tag": "자본잠식"
+     },
+     {
+      "name": "부채비율",
+      "values": {
+       "2024": 10.88888888888889
+      },
+      "severity": "RED",
+      "score": 15.0,
+      "reason": "부채비율 1089%(400% 초과)",
+      "ksa570_tag": "과도한 재무 레버리지"
+     },
+     {
+      "name": "유동비율",
+      "values": {
+       "2024": 0.6052631578947368
+      },
+      "severity": "YELLOW",
+      "score": 7.5,
+      "reason": "유동비율 61%(100% 미만)",
+      "ksa570_tag": "단기 유동성 부족"
+     },
+     {
+      "name": "이자보상배율",
+      "values": {
+       "2020": 2.5,
+       "2021": 1.1111111111111112,
+       "2022": 0.3,
+       "2023": 0.09090909090909091,
+       "2024": -0.4166666666666667
+      },
+      "severity": "RED",
+      "score": 25.0,
+      "reason": "이자보상배율 3개년 연속 1 미만(한계기업) (당기 -0.42)",
+      "ksa570_tag": "차입금 상환 능력 저하"
+     }
+    ],
+    "snapshot_id": "SNAP-e261d6719336",
+    "rule_version": "risk-rules@0.1.0"
+   },
+   "signals": [
+    {
+     "signal_id": "SIG-1a82e6a30f94",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "RISK_KEYWORD",
+     "severity": "RED",
+     "score_contribution": 15.0,
+     "title": "위험 키워드 '소송' 공시 1건 탐지",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240315000101",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240315000101",
+       "excerpt": "소송등의제기ㆍ신청(일정금액이상의청구)\n당사는 협력",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 550",
+      "K-IFRS 1037"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "keyword_id": "LAWSUIT",
+      "keyword_label": "소송",
+      "hits": 1
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-cf0fd0ece7d1",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "RISK_KEYWORD",
+     "severity": "RED",
+     "score_contribution": 15.0,
+     "title": "위험 키워드 '횡령' 공시 1건 탐지",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240902000301",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240902000301",
+       "excerpt": "횡령ㆍ배임혐의발생\n전 대표이사 등에 대하여 업무상",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 240"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "keyword_id": "EMBEZZLEMENT",
+      "keyword_label": "횡령",
+      "hits": 1
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-6f977f523d56",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "RISK_KEYWORD",
+     "severity": "RED",
+     "score_contribution": 15.0,
+     "title": "위험 키워드 '배임' 공시 1건 탐지",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240902000301",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240902000301",
+       "excerpt": "횡령ㆍ배임혐의발생\n전 대표이사 등에 대하여 업무상 횡령",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 240"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "keyword_id": "BREACH_OF_TRUST",
+      "keyword_label": "배임",
+      "hits": 1
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-7f705743daa6",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M3",
+     "category": "OVERALL",
+     "severity": "RED",
+     "score_contribution": 82.5,
+     "title": "계속기업 위험 종합: RED (점수 82.5) — 하드룰: 전기 감사보고서 계속기업 관련 중요한 불확실성 문단",
+     "evidence": [
+      {
+       "type": "financial",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "영업현금흐름 추세: 영업활동현금흐름 4년 연속 음수; 자본잠식: 부분 자본잠식(잠식률 10%); 부채비율: 부채비율 1089%(400% 초과); 유동비율: 유동비율 61%(100% 미만); 이자보상배율: 이자보상배율 3개년 연속 1 미만(한계기업) (당기 -0.42)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 570"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "score": 82.5,
+      "hard_rule": "전기 감사보고서 계속기업 관련 중요한 불확실성 문단"
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-434242ed4b45",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "AUDITOR_CHANGE",
+     "severity": "YELLOW",
+     "score_contribution": 10.0,
+     "title": "최근 3년 내 감사인 자유선임 변경 2회",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20230330000001",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230330000001",
+       "excerpt": "2022: 다라회계법인 (자유선임 변경)",
+       "sha256": null,
+       "trust": "untrusted"
+      },
+      {
+       "type": "disclosure",
+       "rcept_no": "20240415000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240415000401",
+       "excerpt": "2023: 마바회계법인 (자유선임 변경)",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 315",
+      "KSA 220"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "free_changes_3y": 2,
+      "designated_3y": 0
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-a96b97125a14",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "AUDIT_EMPHASIS",
+     "severity": "YELLOW",
+     "score_contribution": 8.0,
+     "title": "전기 감사보고서 강조사항/계속기업 불확실성 문단 존재",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240415000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240415000401",
+       "excerpt": "2023 감사의견: 적정; 계속기업 관련 중요한 불확실성 — 계속된 영업손실 및 유동성 부족",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 706",
+      "KSA 570"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "going_concern_para": true
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-f70109c6dcba",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "CORRECTION_FREQ",
+     "severity": "YELLOW",
+     "score_contribution": 8.0,
+     "title": "최근 12개월 정정공시 3건(신뢰성 저하 정황)",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240520000201",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240520000201",
+       "excerpt": "[기재정정]사업보고서 (2023.12) — 재무제표 주석 중 특수관계자 거래 및 우발부채 기재사항 정정",
+       "sha256": null,
+       "trust": "untrusted"
+      },
+      {
+       "type": "disclosure",
+       "rcept_no": "20240610000202",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240610000202",
+       "excerpt": "[기재정정]분기보고서 (2024.03) — 매출채권 대손충당금 산정 오류 정정",
+       "sha256": null,
+       "trust": "untrusted"
+      },
+      {
+       "type": "disclosure",
+       "rcept_no": "20240808000203",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240808000203",
+       "excerpt": "[기재정정]반기보고서 (2024.06) — 공사진행률 재산정에 따른 수익 정정",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 315"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "count_12m": 3
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-f0c9c67daed2",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "NON_AUDIT_FEE",
+     "severity": "YELLOW",
+     "score_contribution": 6.0,
+     "title": "비감사용역 보수 비중 67%(독립성 위험)",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240415000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240415000401",
+       "excerpt": "감사보수 300.0 / 비감사보수 200.0 (백만원)",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 220"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "ratio": 0.667
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-644bb6e9d2b7",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M2",
+     "category": "KAM_MATCH",
+     "severity": "YELLOW",
+     "score_contribution": 0.0,
+     "title": "전기 KAM이 산업 위험 'CONST-R01'(공사수익 / 계약자산(미청구공사))과 일치 — 당기 중점",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "전기 KAM: 공사수익 진행기준 인식 미청구공사 및 매출채권 회수가능성 계속기업 가정",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 540",
+      "KSA 240"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "risk_id": "CONST-R01",
+      "matched_keywords": [
+       "공사수익",
+       "미청구공사"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-9de48baf5087",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M1",
+     "category": "PRIOR_KAM",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "전기 핵심감사사항(KAM) 3건 — 당기 중점검토 영역",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240415000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240415000401",
+       "excerpt": "전기 KAM: 공사수익 진행기준 인식; 미청구공사 및 매출채권 회수가능성; 계속기업 가정",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 701"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "kam": [
+       "공사수익 진행기준 인식",
+       "미청구공사 및 매출채권 회수가능성",
+       "계속기업 가정"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-fdede7e5b007",
+     "engagement_id": "ENG-173d22ec7237",
+     "corp_code": "90000001",
+     "module": "M2",
+     "category": "INDUSTRY",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "산업 프로파일: 건설업 — 고유 위험항목 2건",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "KSIC 41210 → 건설업(industry_risk_map)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "industry_id": "CONST",
+      "name": "건설업",
+      "risk_ids": [
+       "CONST-R01",
+       "CONST-R02"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-e261d6719336",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    }
+   ],
+   "key_risks": [
+    {
+     "key_risk_id": "KR-0a58bf232cb8",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-BASE-01",
+     "title": "경영진의 내부통제 무력화 위험",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "수동전표",
+      "회계추정치",
+      "비경상 거래"
+     ],
+     "assertions": [
+      "발생사실",
+      "정확성",
+      "기간귀속"
+     ],
+     "standards": [
+      "KSA 240"
+     ],
+     "procedures": [
+      "PROC-240-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-GEN-01",
+       "weight_multiplier": 1.2,
+       "reason": "KSA 240 상시 통제무력화 대응"
+      }
+     ],
+     "source_signals": [],
+     "rationale": "KSA 240 문단 31에 따라 경영진의 통제무력화 위험은 모든 감사에서 유의적 위험으로 간주한다."
+    },
+    {
+     "key_risk_id": "KR-5213729b4b1c",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-001",
+     "title": "계속기업 압박에 따른 경영진 편의(이익조정) 위험",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "수익",
+      "매출채권",
+      "재고자산",
+      "이연법인세자산"
+     ],
+     "assertions": [
+      "발생사실",
+      "기간귀속",
+      "평가"
+     ],
+     "standards": [
+      "KSA 240",
+      "KSA 570",
+      "KSA 540"
+     ],
+     "procedures": [
+      "PROC-240-01",
+      "PROC-540-01",
+      "PROC-570-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-R-08",
+       "weight_multiplier": 1.5,
+       "reason": "기말 대량 수동전표"
+      },
+      {
+       "rule_id": "JE-R-12",
+       "weight_multiplier": 2.0,
+       "reason": "수익계정 역분개"
+      }
+     ],
+     "source_signals": [
+      "SIG-7f705743daa6",
+      "SIG-434242ed4b45",
+      "SIG-f70109c6dcba"
+     ],
+     "rationale": "계속기업 불확실성(모듈3)과 공시 신뢰성 저하 신호가 수렴한다. 근거: 계속기업 위험 종합: RED (점수 82.5) — 하드룰: 전기 감사보고서 계속기업 관련 중요한 불확실성 문단, 최근 3년 내 감사인 자유선임 변경 2회, 최근 12개월 정정공시 3건(신뢰성 저하 정황)"
+    },
+    {
+     "key_risk_id": "KR-787ce65369ac",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-002",
+     "title": "자산의 부정한 유용 및 부정한 재무보고 위험",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "현금및현금성자산",
+      "대여금",
+      "기타자산",
+      "특수관계자 거래"
+     ],
+     "assertions": [
+      "실재성",
+      "발생사실"
+     ],
+     "standards": [
+      "KSA 240",
+      "KSA 550"
+     ],
+     "procedures": [
+      "PROC-240-01",
+      "PROC-550-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-R-05",
+       "weight_multiplier": 1.8,
+       "reason": "현금·대여금 관련 비경상 전표"
+      }
+     ],
+     "source_signals": [
+      "SIG-cf0fd0ece7d1",
+      "SIG-6f977f523d56"
+     ],
+     "rationale": "횡령·배임 관련 공시가 확인된다. 근거: 위험 키워드 '횡령' 공시 1건 탐지, 위험 키워드 '배임' 공시 1건 탐지"
+    },
+    {
+     "key_risk_id": "KR-a1b70cd1b81f",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "CONST-R01",
+     "title": "[산업] 공사수익 / 계약자산(미청구공사) — 투입법 진행률(총공사예정원가 추정) 조정을 통한 수익 과대계상, 미청구공사 회수가능성 저하",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "공사수익 / 계약자산(미청구공사)"
+     ],
+     "assertions": [
+      "발생사실",
+      "정확성",
+      "기간귀속"
+     ],
+     "standards": [
+      "K-IFRS 1115",
+      "KSA 540",
+      "KSA 240"
+     ],
+     "procedures": [
+      "PROC-540-01",
+      "PROC-1115-01",
+      "PROC-1115-02"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-CONST-01",
+       "weight_multiplier": 1.0,
+       "reason": "분기말 진행률 소급 조정 전표"
+      },
+      {
+       "rule_id": "JE-CONST-02",
+       "weight_multiplier": 1.0,
+       "reason": "기말 공사원가 대체 전표 집중"
+      }
+     ],
+     "source_signals": [
+      "SIG-fdede7e5b007",
+      "SIG-644bb6e9d2b7"
+     ],
+     "rationale": "건설업 산업 고유 위험 (전기 KAM 일치)"
+    },
+    {
+     "key_risk_id": "KR-1c261626b58f",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-003",
+     "title": "우발부채(소송)의 완전성 및 공시 위험",
+     "significant_risk_candidate": false,
+     "accounts": [
+      "충당부채",
+      "우발부채"
+     ],
+     "assertions": [
+      "완전성",
+      "표시와 공시"
+     ],
+     "standards": [
+      "KSA 550",
+      "K-IFRS 1037"
+     ],
+     "procedures": [
+      "PROC-550-01",
+      "PROC-1037-01"
+     ],
+     "jet_updates": [],
+     "source_signals": [
+      "SIG-1a82e6a30f94"
+     ],
+     "rationale": "소송 관련 공시가 확인된다. 근거: 위험 키워드 '소송' 공시 1건 탐지"
+    },
+    {
+     "key_risk_id": "KR-7f6e5285f4fd",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-004",
+     "title": "감사인 독립성 및 감사 품질 저하 정황(의견구매 위험)",
+     "significant_risk_candidate": false,
+     "accounts": [],
+     "assertions": [],
+     "standards": [
+      "KSA 220",
+      "KSA 315"
+     ],
+     "procedures": [],
+     "jet_updates": [],
+     "source_signals": [
+      "SIG-f0c9c67daed2",
+      "SIG-434242ed4b45"
+     ],
+     "rationale": "비감사보수 비중 과다와 자유선임 감사인 변경이 함께 관찰된다. 근거: 비감사용역 보수 비중 67%(독립성 위험), 최근 3년 내 감사인 자유선임 변경 2회"
+    },
+    {
+     "key_risk_id": "KR-3b7773621ff7",
+     "engagement_id": "ENG-173d22ec7237",
+     "rule_id": "XV-005",
+     "title": "계속기업 가정의 불확실성",
+     "significant_risk_candidate": false,
+     "accounts": [
+      "자산 전반(회수가능성)",
+      "부채(만기)"
+     ],
+     "assertions": [
+      "평가",
+      "표시와 공시"
+     ],
+     "standards": [
+      "KSA 570"
+     ],
+     "procedures": [
+      "PROC-570-01"
+     ],
+     "jet_updates": [],
+     "source_signals": [
+      "SIG-7f705743daa6"
+     ],
+     "rationale": "계속기업 스코어링(모듈3) 결과 유의적 신호가 관찰된다. 근거: 계속기업 위험 종합: RED (점수 82.5) — 하드룰: 전기 감사보고서 계속기업 관련 중요한 불확실성 문단"
+    }
+   ],
+   "jet": [
+    {
+     "rule_id": "JE-GEN-01",
+     "mult": 1.2,
+     "reason": "KSA 240 상시 통제무력화 대응",
+     "kr": "경영진의 내부통제 무력화 위험"
+    },
+    {
+     "rule_id": "JE-R-08",
+     "mult": 1.5,
+     "reason": "기말 대량 수동전표",
+     "kr": "계속기업 압박에 따른 경영진 편의(이익조정) 위험"
+    },
+    {
+     "rule_id": "JE-R-12",
+     "mult": 2.0,
+     "reason": "수익계정 역분개",
+     "kr": "계속기업 압박에 따른 경영진 편의(이익조정) 위험"
+    },
+    {
+     "rule_id": "JE-R-05",
+     "mult": 1.8,
+     "reason": "현금·대여금 관련 비경상 전표",
+     "kr": "자산의 부정한 유용 및 부정한 재무보고 위험"
+    },
+    {
+     "rule_id": "JE-CONST-01",
+     "mult": 1.0,
+     "reason": "분기말 진행률 소급 조정 전표",
+     "kr": "[산업] 공사수익 / 계약자산(미청구공사) — 투입법 진행률(총공사예정원가 추정) 조정을 통한 수익 과대계상, 미청구공사 회수가능성 저하"
+    },
+    {
+     "rule_id": "JE-CONST-02",
+     "mult": 1.0,
+     "reason": "기말 공사원가 대체 전표 집중",
+     "kr": "[산업] 공사수익 / 계약자산(미청구공사) — 투입법 진행률(총공사예정원가 추정) 조정을 통한 수익 과대계상, 미청구공사 회수가능성 저하"
+    }
+   ],
+   "financials": [
+    {
+     "year": 2020,
+     "basis": "CFS",
+     "revenue": 500000.0,
+     "operating_income": 20000.0,
+     "interest_expense": 8000.0,
+     "operating_cash_flow": 15000.0,
+     "current_assets": 300000.0,
+     "current_liabilities": 250000.0,
+     "total_assets": 950000.0,
+     "total_liabilities": 700000.0,
+     "total_equity": 250000.0,
+     "capital_stock": 100000.0,
+     "cash": 40000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2021,
+     "basis": "CFS",
+     "revenue": 480000.0,
+     "operating_income": 10000.0,
+     "interest_expense": 9000.0,
+     "operating_cash_flow": -5000.0,
+     "current_assets": 290000.0,
+     "current_liabilities": 280000.0,
+     "total_assets": 970000.0,
+     "total_liabilities": 750000.0,
+     "total_equity": 220000.0,
+     "capital_stock": 100000.0,
+     "cash": 35000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2022,
+     "basis": "CFS",
+     "revenue": 450000.0,
+     "operating_income": 3000.0,
+     "interest_expense": 10000.0,
+     "operating_cash_flow": -12000.0,
+     "current_assets": 270000.0,
+     "current_liabilities": 300000.0,
+     "total_assets": 1000000.0,
+     "total_liabilities": 820000.0,
+     "total_equity": 180000.0,
+     "capital_stock": 100000.0,
+     "cash": 30000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2023,
+     "basis": "CFS",
+     "revenue": 420000.0,
+     "operating_income": 1000.0,
+     "interest_expense": 11000.0,
+     "operating_cash_flow": -18000.0,
+     "current_assets": 250000.0,
+     "current_liabilities": 340000.0,
+     "total_assets": 1030000.0,
+     "total_liabilities": 900000.0,
+     "total_equity": 130000.0,
+     "capital_stock": 100000.0,
+     "cash": 25000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2024,
+     "basis": "CFS",
+     "revenue": 400000.0,
+     "operating_income": -5000.0,
+     "interest_expense": 12000.0,
+     "operating_cash_flow": -25000.0,
+     "current_assets": 230000.0,
+     "current_liabilities": 380000.0,
+     "total_assets": 1070000.0,
+     "total_liabilities": 980000.0,
+     "total_equity": 90000.0,
+     "capital_stock": 100000.0,
+     "cash": 20000.0,
+     "rcept_no": null
+    }
+   ]
+  },
+  {
+   "corp_code": "90000003",
+   "name": "제노바이오",
+   "stock": "900003",
+   "ksic": "21102",
+   "industry": "바이오·제약",
+   "year": 2024,
+   "snapshot": "SNAP-cf7305694737",
+   "rule_version": "risk-rules@0.1.0",
+   "gc": {
+    "engagement_id": "ENG-aa4c54c1a783",
+    "corp_code": "90000003",
+    "overall_severity": "YELLOW",
+    "overall_score": 32.5,
+    "hard_rule_triggered": null,
+    "indicators": [
+     {
+      "name": "영업현금흐름 추세",
+      "values": {
+       "2020": -12000.0,
+       "2021": -15000.0,
+       "2022": -18000.0,
+       "2023": -20000.0,
+       "2024": -24000.0
+      },
+      "severity": "YELLOW",
+      "score": 12.5,
+      "reason": "영업활동현금흐름 5년 연속 음수",
+      "ksa570_tag": "영업활동 순현금유출 지속"
+     },
+     {
+      "name": "자본잠식",
+      "values": {
+       "2024": -1.2727272727272727
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "자본잠식 없음",
+      "ksa570_tag": "자본잠식"
+     },
+     {
+      "name": "부채비율",
+      "values": {
+       "2024": 0.32
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "부채비율 32%",
+      "ksa570_tag": "과도한 재무 레버리지"
+     },
+     {
+      "name": "유동비율",
+      "values": {
+       "2024": 4.444444444444445
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "유동비율 444%",
+      "ksa570_tag": "단기 유동성 부족"
+     },
+     {
+      "name": "현금 runway",
+      "values": {
+       "2024": 1.4166666666666667
+      },
+      "severity": "YELLOW",
+      "score": 20.0,
+      "reason": "현금 runway 1.4년(2년 미만)",
+      "ksa570_tag": "현금 소진(자금조달 의존)"
+     }
+    ],
+    "snapshot_id": "SNAP-cf7305694737",
+    "rule_version": "risk-rules@0.1.0"
+   },
+   "signals": [
+    {
+     "signal_id": "SIG-5410f8985b82",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "corp_code": "90000003",
+     "module": "M2",
+     "category": "KAM_MATCH",
+     "severity": "YELLOW",
+     "score_contribution": 0.0,
+     "title": "전기 KAM이 산업 위험 'BIO-R01'(개발비(무형자산))과 일치 — 당기 중점",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "전기 KAM: 개발비 자산화 라이선스아웃 수익 인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 540"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "risk_id": "BIO-R01",
+      "matched_keywords": [
+       "개발비",
+       "자산화"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-cf7305694737",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-37b49e514164",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "corp_code": "90000003",
+     "module": "M2",
+     "category": "KAM_MATCH",
+     "severity": "YELLOW",
+     "score_contribution": 0.0,
+     "title": "전기 KAM이 산업 위험 'BIO-R02'(라이선스아웃 수익 / 계약부채)과 일치 — 당기 중점",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "전기 KAM: 개발비 자산화 라이선스아웃 수익 인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 540"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "risk_id": "BIO-R02",
+      "matched_keywords": [
+       "라이선스"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-cf7305694737",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-637d0d43524b",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "corp_code": "90000003",
+     "module": "M3",
+     "category": "OVERALL",
+     "severity": "YELLOW",
+     "score_contribution": 32.5,
+     "title": "계속기업 위험 종합: YELLOW (점수 32.5)",
+     "evidence": [
+      {
+       "type": "financial",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "영업현금흐름 추세: 영업활동현금흐름 5년 연속 음수; 자본잠식: 자본잠식 없음; 부채비율: 부채비율 32%; 유동비율: 유동비율 444%; 현금 runway: 현금 runway 1.4년(2년 미만)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 570"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "score": 32.5,
+      "hard_rule": ""
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-cf7305694737",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-c13d5d60309c",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "corp_code": "90000003",
+     "module": "M1",
+     "category": "PRIOR_KAM",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "전기 핵심감사사항(KAM) 2건 — 당기 중점검토 영역",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240328000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240328000401",
+       "excerpt": "전기 KAM: 개발비 자산화; 라이선스아웃 수익 인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 701"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "kam": [
+       "개발비 자산화",
+       "라이선스아웃 수익 인식"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-cf7305694737",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-d2aa40cd7949",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "corp_code": "90000003",
+     "module": "M2",
+     "category": "INDUSTRY",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "산업 프로파일: 바이오·제약 — 고유 위험항목 3건",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "KSIC 21102 → 바이오·제약(industry_risk_map)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "industry_id": "BIO",
+      "name": "바이오·제약",
+      "risk_ids": [
+       "BIO-R01",
+       "BIO-R02",
+       "BIO-R03"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-cf7305694737",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    }
+   ],
+   "key_risks": [
+    {
+     "key_risk_id": "KR-267027d71a72",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "rule_id": "XV-BASE-01",
+     "title": "경영진의 내부통제 무력화 위험",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "수동전표",
+      "회계추정치",
+      "비경상 거래"
+     ],
+     "assertions": [
+      "발생사실",
+      "정확성",
+      "기간귀속"
+     ],
+     "standards": [
+      "KSA 240"
+     ],
+     "procedures": [
+      "PROC-240-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-GEN-01",
+       "weight_multiplier": 1.2,
+       "reason": "KSA 240 상시 통제무력화 대응"
+      }
+     ],
+     "source_signals": [],
+     "rationale": "KSA 240 문단 31에 따라 경영진의 통제무력화 위험은 모든 감사에서 유의적 위험으로 간주한다."
+    },
+    {
+     "key_risk_id": "KR-0c088d89dafd",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "rule_id": "BIO-R01",
+     "title": "[산업] 개발비(무형자산) — 임상 성공가능성 근거 없는 개발비 자산화 및 손상 미인식",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "개발비(무형자산)"
+     ],
+     "assertions": [
+      "실재성",
+      "평가"
+     ],
+     "standards": [
+      "K-IFRS 1038",
+      "K-IFRS 1036",
+      "KSA 540"
+     ],
+     "procedures": [
+      "PROC-1038-01",
+      "PROC-1036-01",
+      "PROC-540-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-BIO-01",
+       "weight_multiplier": 1.0,
+       "reason": "개발비 자산화·손상환입 수동 전표"
+      }
+     ],
+     "source_signals": [
+      "SIG-d2aa40cd7949",
+      "SIG-5410f8985b82"
+     ],
+     "rationale": "바이오·제약 산업 고유 위험 (전기 KAM 일치)"
+    },
+    {
+     "key_risk_id": "KR-eebc18b5492a",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "rule_id": "BIO-R02",
+     "title": "[산업] 라이선스아웃 수익 / 계약부채 — 선급 마일스톤·업프론트의 수행의무 배분 및 인식시점 오류",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "라이선스아웃 수익 / 계약부채"
+     ],
+     "assertions": [
+      "기간귀속",
+      "정확성"
+     ],
+     "standards": [
+      "K-IFRS 1115",
+      "KSA 540"
+     ],
+     "procedures": [
+      "PROC-1115-05"
+     ],
+     "jet_updates": [],
+     "source_signals": [
+      "SIG-d2aa40cd7949",
+      "SIG-37b49e514164"
+     ],
+     "rationale": "바이오·제약 산업 고유 위험 (전기 KAM 일치)"
+    },
+    {
+     "key_risk_id": "KR-f1ab60fe1262",
+     "engagement_id": "ENG-aa4c54c1a783",
+     "rule_id": "XV-005",
+     "title": "계속기업 가정의 불확실성",
+     "significant_risk_candidate": false,
+     "accounts": [
+      "자산 전반(회수가능성)",
+      "부채(만기)"
+     ],
+     "assertions": [
+      "평가",
+      "표시와 공시"
+     ],
+     "standards": [
+      "KSA 570"
+     ],
+     "procedures": [
+      "PROC-570-01"
+     ],
+     "jet_updates": [],
+     "source_signals": [
+      "SIG-637d0d43524b"
+     ],
+     "rationale": "계속기업 스코어링(모듈3) 결과 유의적 신호가 관찰된다. 근거: 계속기업 위험 종합: YELLOW (점수 32.5)"
+    }
+   ],
+   "jet": [
+    {
+     "rule_id": "JE-GEN-01",
+     "mult": 1.2,
+     "reason": "KSA 240 상시 통제무력화 대응",
+     "kr": "경영진의 내부통제 무력화 위험"
+    },
+    {
+     "rule_id": "JE-BIO-01",
+     "mult": 1.0,
+     "reason": "개발비 자산화·손상환입 수동 전표",
+     "kr": "[산업] 개발비(무형자산) — 임상 성공가능성 근거 없는 개발비 자산화 및 손상 미인식"
+    }
+   ],
+   "financials": [
+    {
+     "year": 2020,
+     "basis": "CFS",
+     "revenue": 0.0,
+     "operating_income": -15000.0,
+     "interest_expense": 0.0,
+     "operating_cash_flow": -12000.0,
+     "current_assets": 60000.0,
+     "current_liabilities": 5000.0,
+     "total_assets": 88000.0,
+     "total_liabilities": 8000.0,
+     "total_equity": 80000.0,
+     "capital_stock": 20000.0,
+     "cash": 55000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2021,
+     "basis": "CFS",
+     "revenue": 0.0,
+     "operating_income": -18000.0,
+     "interest_expense": 0.0,
+     "operating_cash_flow": -15000.0,
+     "current_assets": 90000.0,
+     "current_liabilities": 6000.0,
+     "total_assets": 120000.0,
+     "total_liabilities": 10000.0,
+     "total_equity": 110000.0,
+     "capital_stock": 22000.0,
+     "cash": 85000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2022,
+     "basis": "CFS",
+     "revenue": 500.0,
+     "operating_income": -20000.0,
+     "interest_expense": 100.0,
+     "operating_cash_flow": -18000.0,
+     "current_assets": 70000.0,
+     "current_liabilities": 7000.0,
+     "total_assets": 102000.0,
+     "total_liabilities": 12000.0,
+     "total_equity": 90000.0,
+     "capital_stock": 22000.0,
+     "cash": 65000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2023,
+     "basis": "CFS",
+     "revenue": 800.0,
+     "operating_income": -22000.0,
+     "interest_expense": 100.0,
+     "operating_cash_flow": -20000.0,
+     "current_assets": 55000.0,
+     "current_liabilities": 8000.0,
+     "total_assets": 84000.0,
+     "total_liabilities": 14000.0,
+     "total_equity": 70000.0,
+     "capital_stock": 22000.0,
+     "cash": 48000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2024,
+     "basis": "CFS",
+     "revenue": 1200.0,
+     "operating_income": -25000.0,
+     "interest_expense": 200.0,
+     "operating_cash_flow": -24000.0,
+     "current_assets": 40000.0,
+     "current_liabilities": 9000.0,
+     "total_assets": 66000.0,
+     "total_liabilities": 16000.0,
+     "total_equity": 50000.0,
+     "capital_stock": 22000.0,
+     "cash": 34000.0,
+     "rcept_no": null
+    }
+   ]
+  },
+  {
+   "corp_code": "90000002",
+   "name": "대양제조",
+   "stock": "900002",
+   "ksic": "29120",
+   "industry": "제조업",
+   "year": 2024,
+   "snapshot": "SNAP-63961f8d5ca7",
+   "rule_version": "risk-rules@0.1.0",
+   "gc": {
+    "engagement_id": "ENG-bf47bfa22d32",
+    "corp_code": "90000002",
+    "overall_severity": "GREEN",
+    "overall_score": 0.0,
+    "hard_rule_triggered": null,
+    "indicators": [
+     {
+      "name": "영업현금흐름 추세",
+      "values": {
+       "2020": 70000.0,
+       "2021": 85000.0,
+       "2022": 90000.0,
+       "2023": 100000.0,
+       "2024": 120000.0
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "영업활동현금흐름 양호",
+      "ksa570_tag": "영업활동 순현금유출 지속"
+     },
+     {
+      "name": "자본잠식",
+      "values": {
+       "2024": -17.0
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "자본잠식 없음",
+      "ksa570_tag": "자본잠식"
+     },
+     {
+      "name": "부채비율",
+      "values": {
+       "2024": 0.4444444444444444
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "부채비율 44%",
+      "ksa570_tag": "과도한 재무 레버리지"
+     },
+     {
+      "name": "유동비율",
+      "values": {
+       "2024": 2.08
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "유동비율 208%",
+      "ksa570_tag": "단기 유동성 부족"
+     },
+     {
+      "name": "이자보상배율",
+      "values": {
+       "2020": 16.0,
+       "2021": 18.0,
+       "2022": 21.11111111111111,
+       "2023": 25.0,
+       "2024": 27.5
+      },
+      "severity": "GREEN",
+      "score": 0.0,
+      "reason": "이자보상배율 양호 (당기 27.50)",
+      "ksa570_tag": "차입금 상환 능력 저하"
+     }
+    ],
+    "snapshot_id": "SNAP-63961f8d5ca7",
+    "rule_version": "risk-rules@0.1.0"
+   },
+   "signals": [
+    {
+     "signal_id": "SIG-8a58cb8d771c",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "corp_code": "90000002",
+     "module": "M2",
+     "category": "KAM_MATCH",
+     "severity": "YELLOW",
+     "score_contribution": 0.0,
+     "title": "전기 KAM이 산업 위험 'MFG-R01'(재고자산)과 일치 — 당기 중점",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "전기 KAM: 재고자산 평가 매출인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 501",
+      "KSA 540"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "risk_id": "MFG-R01",
+      "matched_keywords": [
+       "재고자산",
+       "재고"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-63961f8d5ca7",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-c21128fd4af2",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "corp_code": "90000002",
+     "module": "M2",
+     "category": "KAM_MATCH",
+     "severity": "YELLOW",
+     "score_contribution": 0.0,
+     "title": "전기 KAM이 산업 위험 'MFG-R02'(매출 / 매출채권)과 일치 — 당기 중점",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "전기 KAM: 재고자산 평가 매출인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 240"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "risk_id": "MFG-R02",
+      "matched_keywords": [
+       "매출"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-63961f8d5ca7",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-ba04603af0d6",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "corp_code": "90000002",
+     "module": "M1",
+     "category": "PRIOR_KAM",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "전기 핵심감사사항(KAM) 2건 — 당기 중점검토 영역",
+     "evidence": [
+      {
+       "type": "disclosure",
+       "rcept_no": "20240329000401",
+       "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240329000401",
+       "excerpt": "전기 KAM: 재고자산 평가; 매출인식",
+       "sha256": null,
+       "trust": "untrusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 701"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "kam": [
+       "재고자산 평가",
+       "매출인식"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-63961f8d5ca7",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-14eee606aaaa",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "corp_code": "90000002",
+     "module": "M2",
+     "category": "INDUSTRY",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "산업 프로파일: 제조업 — 고유 위험항목 2건",
+     "evidence": [
+      {
+       "type": "note",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "KSIC 29120 → 제조업(industry_risk_map)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "industry_id": "MFG",
+      "name": "제조업",
+      "risk_ids": [
+       "MFG-R01",
+       "MFG-R02"
+      ]
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-63961f8d5ca7",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    },
+    {
+     "signal_id": "SIG-8337b2df64db",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "corp_code": "90000002",
+     "module": "M3",
+     "category": "OVERALL",
+     "severity": "GREEN",
+     "score_contribution": 0.0,
+     "title": "계속기업 위험 종합: GREEN (점수 0.0)",
+     "evidence": [
+      {
+       "type": "financial",
+       "rcept_no": null,
+       "url": null,
+       "excerpt": "영업현금흐름 추세: 영업활동현금흐름 양호; 자본잠식: 자본잠식 없음; 부채비율: 부채비율 44%; 유동비율: 유동비율 208%; 이자보상배율: 이자보상배율 양호 (당기 27.50)",
+       "sha256": null,
+       "trust": "trusted"
+      }
+     ],
+     "standard_refs": [
+      "KSA 570"
+     ],
+     "related_assertions": [],
+     "confidence": 1.0,
+     "metrics": {
+      "score": 0.0,
+      "hard_rule": ""
+     },
+     "detected_at": "2026-07-05T15:33:28+09:00",
+     "rule_version": "risk-rules@0.1.0",
+     "snapshot_id": "SNAP-63961f8d5ca7",
+     "status": "OPEN",
+     "review": {
+      "state": "UNREVIEWED",
+      "reviewer": null,
+      "note": null
+     }
+    }
+   ],
+   "key_risks": [
+    {
+     "key_risk_id": "KR-3d0633e5b794",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "rule_id": "XV-BASE-01",
+     "title": "경영진의 내부통제 무력화 위험",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "수동전표",
+      "회계추정치",
+      "비경상 거래"
+     ],
+     "assertions": [
+      "발생사실",
+      "정확성",
+      "기간귀속"
+     ],
+     "standards": [
+      "KSA 240"
+     ],
+     "procedures": [
+      "PROC-240-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-GEN-01",
+       "weight_multiplier": 1.2,
+       "reason": "KSA 240 상시 통제무력화 대응"
+      }
+     ],
+     "source_signals": [],
+     "rationale": "KSA 240 문단 31에 따라 경영진의 통제무력화 위험은 모든 감사에서 유의적 위험으로 간주한다."
+    },
+    {
+     "key_risk_id": "KR-97f8280bdad7",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "rule_id": "MFG-R02",
+     "title": "[산업] 매출 / 매출채권 — 기간귀속 조작(cut-off)을 통한 매출 조기·가공 인식",
+     "significant_risk_candidate": true,
+     "accounts": [
+      "매출 / 매출채권"
+     ],
+     "assertions": [
+      "발생사실",
+      "기간귀속"
+     ],
+     "standards": [
+      "K-IFRS 1115",
+      "KSA 240"
+     ],
+     "procedures": [
+      "PROC-1115-03",
+      "PROC-240-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-MFG-02",
+       "weight_multiplier": 1.0,
+       "reason": "기말 임박 대량 매출전표"
+      },
+      {
+       "rule_id": "JE-MFG-03",
+       "weight_multiplier": 1.0,
+       "reason": "기초 역분개(매출 취소) 전표"
+      }
+     ],
+     "source_signals": [
+      "SIG-14eee606aaaa",
+      "SIG-c21128fd4af2"
+     ],
+     "rationale": "제조업 산업 고유 위험 (전기 KAM 일치)"
+    },
+    {
+     "key_risk_id": "KR-829196a03da5",
+     "engagement_id": "ENG-bf47bfa22d32",
+     "rule_id": "MFG-R01",
+     "title": "[산업] 재고자산 — 장기체화·진부화 재고에 대한 평가손실(순실현가능가치) 미반영",
+     "significant_risk_candidate": false,
+     "accounts": [
+      "재고자산"
+     ],
+     "assertions": [
+      "실재성",
+      "평가"
+     ],
+     "standards": [
+      "K-IFRS 1002",
+      "KSA 501",
+      "KSA 540"
+     ],
+     "procedures": [
+      "PROC-501-01",
+      "PROC-1002-01"
+     ],
+     "jet_updates": [
+      {
+       "rule_id": "JE-MFG-01",
+       "weight_multiplier": 1.0,
+       "reason": "기말 재고평가충당금 환입 전표"
+      }
+     ],
+     "source_signals": [
+      "SIG-14eee606aaaa",
+      "SIG-8a58cb8d771c"
+     ],
+     "rationale": "제조업 산업 고유 위험 (전기 KAM 일치)"
+    }
+   ],
+   "jet": [
+    {
+     "rule_id": "JE-GEN-01",
+     "mult": 1.2,
+     "reason": "KSA 240 상시 통제무력화 대응",
+     "kr": "경영진의 내부통제 무력화 위험"
+    },
+    {
+     "rule_id": "JE-MFG-02",
+     "mult": 1.0,
+     "reason": "기말 임박 대량 매출전표",
+     "kr": "[산업] 매출 / 매출채권 — 기간귀속 조작(cut-off)을 통한 매출 조기·가공 인식"
+    },
+    {
+     "rule_id": "JE-MFG-03",
+     "mult": 1.0,
+     "reason": "기초 역분개(매출 취소) 전표",
+     "kr": "[산업] 매출 / 매출채권 — 기간귀속 조작(cut-off)을 통한 매출 조기·가공 인식"
+    },
+    {
+     "rule_id": "JE-MFG-01",
+     "mult": 1.0,
+     "reason": "기말 재고평가충당금 환입 전표",
+     "kr": "[산업] 재고자산 — 장기체화·진부화 재고에 대한 평가손실(순실현가능가치) 미반영"
+    }
+   ],
+   "financials": [
+    {
+     "year": 2020,
+     "basis": "CFS",
+     "revenue": 800000.0,
+     "operating_income": 80000.0,
+     "interest_expense": 5000.0,
+     "operating_cash_flow": 70000.0,
+     "current_assets": 400000.0,
+     "current_liabilities": 200000.0,
+     "total_assets": 950000.0,
+     "total_liabilities": 350000.0,
+     "total_equity": 600000.0,
+     "capital_stock": 50000.0,
+     "cash": 100000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2021,
+     "basis": "CFS",
+     "revenue": 850000.0,
+     "operating_income": 90000.0,
+     "interest_expense": 5000.0,
+     "operating_cash_flow": 85000.0,
+     "current_assets": 420000.0,
+     "current_liabilities": 210000.0,
+     "total_assets": 1020000.0,
+     "total_liabilities": 360000.0,
+     "total_equity": 660000.0,
+     "capital_stock": 50000.0,
+     "cash": 120000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2022,
+     "basis": "CFS",
+     "revenue": 900000.0,
+     "operating_income": 95000.0,
+     "interest_expense": 4500.0,
+     "operating_cash_flow": 90000.0,
+     "current_assets": 450000.0,
+     "current_liabilities": 220000.0,
+     "total_assets": 1090000.0,
+     "total_liabilities": 370000.0,
+     "total_equity": 720000.0,
+     "capital_stock": 50000.0,
+     "cash": 140000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2023,
+     "basis": "CFS",
+     "revenue": 950000.0,
+     "operating_income": 100000.0,
+     "interest_expense": 4000.0,
+     "operating_cash_flow": 100000.0,
+     "current_assets": 480000.0,
+     "current_liabilities": 230000.0,
+     "total_assets": 1180000.0,
+     "total_liabilities": 380000.0,
+     "total_equity": 800000.0,
+     "capital_stock": 50000.0,
+     "cash": 160000.0,
+     "rcept_no": null
+    },
+    {
+     "year": 2024,
+     "basis": "CFS",
+     "revenue": 1000000.0,
+     "operating_income": 110000.0,
+     "interest_expense": 4000.0,
+     "operating_cash_flow": 120000.0,
+     "current_assets": 520000.0,
+     "current_liabilities": 250000.0,
+     "total_assets": 1300000.0,
+     "total_liabilities": 400000.0,
+     "total_equity": 900000.0,
+     "capital_stock": 50000.0,
+     "cash": 200000.0,
+     "rcept_no": null
+    }
+   ]
+  }
+ ]
+}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('smartra-data').textContent);
+const SEV = {
+  RED:    { ko: '적색', cls: 'red',   sev: 'var(--red)',   bg: 'var(--red-bg)',   line: 'var(--red-line)' },
+  YELLOW: { ko: '황색', cls: 'amber', sev: 'var(--amber)', bg: 'var(--amber-bg)', line: 'var(--amber-line)' },
+  GREEN:  { ko: '녹색', cls: 'green', sev: 'var(--green)', bg: 'var(--green-bg)', line: 'var(--green-line)' },
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sevVars = k => `--sev:${SEV[k].sev};--sev-bg:${SEV[k].bg};--sev-line:${SEV[k].line};`;
+
+function severityCounts(c) {
+  const r = { RED: 0, YELLOW: 0, GREEN: 0 };
+  c.signals.forEach(s => r[s.severity]++);
+  return r;
+}
+function signif(c) { return c.key_risks.filter(k => k.significant_risk_candidate).length; }
+
+/* provenance / footer */
+document.getElementById('prov').innerHTML =
+  `룰버전 <b>${esc(DATA.companies[0].rule_version)}</b> · 대상 <b>${DATA.companies.length}</b>사 · 회계연도 <b>${DATA.companies[0].year}</b>`;
+document.getElementById('disclaimer').innerHTML =
+  '본 대시보드는 DART 공시 등 공개정보를 기반으로 시스템이 자동 생성한 <b>초안</b>이다. ' +
+  '위험평가에 대한 최종 판단, 유의적 위험의 결정, 감사절차의 성격·시기·범위 결정은 업무수행이사와 감사팀이 수행한다(감사기준서 500·240·570).';
+document.getElementById('footmeta').innerHTML =
+  '신호와 핵심위험은 원문 근거(rcept_no)와 룰 버전·스냅샷을 함께 갖추고 있다(재현성). ' +
+  '공시 원문 발췌는 <code>untrusted</code>로 표기한 외부 유래 텍스트다.';
+
+/* portfolio cards */
+const pf = document.getElementById('portfolio');
+DATA.companies.forEach((c, i) => {
+  const sc = severityCounts(c), s = c.gc.overall_severity;
+  const card = document.createElement('button');
+  card.className = 'pcard'; card.setAttribute('role', 'tab');
+  card.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+  card.style.cssText = sevVars(s);
+  card.innerHTML = `
+    <div class="co">${esc(c.name)}</div>
+    <div class="ind">${esc(c.industry || '미매핑')} · KSIC ${esc(c.ksic)} · 종목 ${esc(c.stock || '-')}</div>
+    <div class="row">
+      <span class="sev-pill"><span class="sev-dot"></span>${SEV[s].ko} · ${s}</span>
+      <span class="score">${c.gc.overall_score}<span>/100</span></span>
+    </div>
+    <div class="counts">
+      <span>신호 <b>${c.signals.length}</b></span>
+      <span style="color:var(--red)">RED <b style="color:var(--red)">${sc.RED}</b></span>
+      <span style="color:var(--amber)">YEL <b style="color:var(--amber)">${sc.YELLOW}</b></span>
+      <span>핵심위험 <b>${c.key_risks.length}</b></span>
+      <span>유의적 <b>${signif(c)}</b></span>
+    </div>`;
+  card.addEventListener('click', () => select(i));
+  pf.appendChild(card);
+});
+
+/* sparkline canvas: year->value dict, draws area + zero baseline + endpoint dot */
+function sparkline(values, sev) {
+  const ys = Object.keys(values).sort();
+  const pts = ys.map(y => values[y]).filter(v => v !== null && v !== undefined);
+  const cv = document.createElement('canvas');
+  const W = 96, H = 30, dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  cv.className = 'spark';
+  if (pts.length < 2) { return cv; }
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const min = Math.min(...pts, 0), max = Math.max(...pts, 0), span = (max - min) || 1;
+  const pad = 3, x = i => pad + i * (W - 2 * pad) / (pts.length - 1);
+  const y = v => H - pad - (v - min) / span * (H - 2 * pad);
+  const col = getComputedStyle(document.documentElement).getPropertyValue(
+    sev === 'RED' ? '--red' : sev === 'YELLOW' ? '--amber' : '--green').trim();
+  // zero baseline
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-strong').trim();
+  ctx.lineWidth = 1; ctx.setLineDash([2, 2]); ctx.beginPath();
+  ctx.moveTo(pad, y(0)); ctx.lineTo(W - pad, y(0)); ctx.stroke(); ctx.setLineDash([]);
+  // area
+  ctx.beginPath(); ctx.moveTo(x(0), y(pts[0]));
+  pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+  ctx.lineTo(x(pts.length - 1), y(0)); ctx.lineTo(x(0), y(0)); ctx.closePath();
+  ctx.fillStyle = col + '22'; ctx.fill();
+  // line
+  ctx.beginPath(); ctx.moveTo(x(0), y(pts[0]));
+  pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+  ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
+  // endpoint
+  ctx.beginPath(); ctx.arc(x(pts.length - 1), y(pts[pts.length - 1]), 2.4, 0, 7); ctx.fillStyle = col; ctx.fill();
+  return cv;
+}
+
+function detailHTML(c) {
+  const s = c.gc.overall_severity, sc = severityCounts(c);
+  const fillW = Math.max(2, Math.min(100, c.gc.overall_score));
+  const hard = c.gc.hard_rule_triggered
+    ? `<div class="hardrule" style="${sevVars('RED')}"><span class="k">하드룰 발동</span> ${esc(c.gc.hard_rule_triggered)} → 즉시 적색(부록 B)</div>` : '';
+
+  const indRows = c.gc.indicators.map(ind => {
+    const multiYear = Object.keys(ind.values).length > 1;
+    return `<tr style="${sevVars(ind.severity)}">
+      <td><b>${esc(ind.name)}</b></td>
+      <td><span class="chip"><span class="sev-dot"></span>${ind.severity}</span></td>
+      <td>${esc(ind.reason)}</td>
+      <td class="num" data-spark='${multiYear ? esc(JSON.stringify({v: ind.values, s: ind.severity})) : ''}'></td>
+      <td><span class="tag">${esc(ind.ksa570_tag)}</span></td>
+    </tr>`;
+  }).join('');
+
+  const sigRows = c.signals.filter(x => x.severity !== 'GREEN').map(sg => {
+    const ev = sg.evidence && sg.evidence[0] && sg.evidence[0].rcept_no;
+    const evLink = ev ? `<a class="ev" href="${esc(sg.evidence[0].url)}" target="_blank" rel="noopener">${esc(sg.evidence[0].rcept_no)} ↗</a>`
+      : `<span class="untrusted">근거: ${esc((sg.evidence[0]||{}).type || '—')}</span>`;
+    return `<div class="sig" style="${sevVars(sg.severity)}">
+      <span class="chip"><span class="sev-dot"></span>${sg.severity}</span>
+      <div class="lead">
+        <span class="mod">${esc(sg.module)}·${esc(sg.category)}</span>
+        <span class="title">${esc(sg.title)}</span>
+      </div>
+      ${evLink}
+    </div>`;
+  }).join('');
+
+  const krCards = c.key_risks.map(k => `
+    <div class="kr ${k.significant_risk_candidate ? 'sig' : ''}">
+      <h4>${esc(k.title)}${k.significant_risk_candidate ? '<span class="flag">유의적 위험 후보</span>' : ''}</h4>
+      <div class="rid">${esc(k.rule_id)} · 기여신호 ${k.source_signals.length}건</div>
+      <div class="rationale">${esc(k.rationale)}</div>
+      <dl>
+        ${k.accounts.length ? `<dt>계정</dt><dd>${esc(k.accounts.join(', '))}</dd>` : ''}
+        ${k.assertions.length ? `<dt>주장</dt><dd>${esc(k.assertions.join(', '))}</dd>` : ''}
+        <dt>기준서</dt><dd class="std">${esc(k.standards.join(', ') || '—')}</dd>
+      </dl>
+      ${k.procedures.length ? `<ul>${k.procedures.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
+    </div>`).join('');
+
+  const jetRows = c.jet.map(j => `<tr>
+      <td class="std" style="font-family:var(--mono)">${esc(j.rule_id)}</td>
+      <td class="num"><span class="mult">×${j.mult}</span></td>
+      <td>${esc(j.reason)}</td>
+      <td style="color:var(--muted)">${esc(j.kr)}</td>
+    </tr>`).join('');
+
+  return `
+  <div class="eyebrow"><span class="num">02</span>${esc(c.name)} · 위험평가 상세</div>
+  <div class="panel" style="${sevVars(s)}">
+    <div class="panel-head">
+      <div>
+        <h2>${esc(c.name)} <span style="font-size:var(--fs-md);color:var(--faint);font-family:var(--mono)">${esc(c.corp_code)}</span></h2>
+        <div class="meta">${esc(c.industry)} · KSIC ${esc(c.ksic)} · FY${c.year} · 스냅샷 ${esc(c.snapshot)}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="sev-pill" style="font-size:var(--fs-base);padding:5px 14px"><span class="sev-dot"></span>${SEV[s].ko} · ${s}</span>
+      </div>
+    </div>
+
+    <div class="gauge-wrap">
+      <div class="gauge-top"><span class="lbl">계속기업 위험점수 (KSA 570)</span>
+        <span class="val">${c.gc.overall_score} / 100</span></div>
+      <div class="gauge-track"><div class="gauge"></div>
+        <div class="gauge-fill" style="width:${fillW}%"></div></div>
+      <div class="gauge-marks"><span style="left:40%">40 · 황</span><span style="left:70%">70 · 적</span></div>
+      ${hard}
+    </div>
+
+    <h3 class="sec">계속기업 지표 <span class="k">모듈 3 · 부록 B</span><span class="rule"></span></h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>지표</th><th>판정</th><th>근거 문장</th><th>추세</th><th>KSA 570 A3</th></tr></thead>
+      <tbody>${indRows}</tbody>
+    </table></div>
+
+    <h3 class="sec">위험신호 <span class="k">모듈 1·2·3 · RED ${sc.RED} / YELLOW ${sc.YELLOW}</span><span class="rule"></span></h3>
+    <div class="sig-groups">${sigRows || '<div class="untrusted" style="padding:8px">비녹색 신호 없음</div>'}</div>
+
+    <h3 class="sec">핵심위험 <span class="k">모듈 4 · 교차검증 → ${c.key_risks.length}건 (유의적 ${signif(c)})</span><span class="rule"></span></h3>
+    <div class="kr-grid">${krCards}</div>
+
+    <h3 class="sec">전표분석(JET) 연동 <span class="flow"><b>KSA 315</b> 위험평가 → <b>KSA 240</b> 분개테스트</span><span class="rule"></span></h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>JET 룰</th><th>가중치</th><th>사유</th><th>원천 핵심위험</th></tr></thead>
+      <tbody>${jetRows || '<tr><td colspan="4" style="color:var(--muted)">조정 대상 없음</td></tr>'}</tbody>
+    </table></div>
+  </div>`;
+}
+
+let current = 0;
+function select(i) {
+  current = i;
+  [...pf.children].forEach((c, j) => c.setAttribute('aria-selected', j === i ? 'true' : 'false'));
+  const d = document.getElementById('detail');
+  d.innerHTML = detailHTML(DATA.companies[i]);
+  // inject sparklines
+  d.querySelectorAll('[data-spark]').forEach(td => {
+    const raw = td.getAttribute('data-spark'); if (!raw) return;
+    const o = JSON.parse(raw); td.appendChild(sparkline(o.v, o.s));
+  });
+}
+
+/* theme toggle */
+const root = document.documentElement, btn = document.getElementById('themeBtn');
+function currentTheme() {
+  return root.getAttribute('data-theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+btn.addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  btn.textContent = next === 'dark' ? '◑ 라이트' : '◐ 다크';
+  select(current); // redraw canvases with new theme colors
+});
+btn.textContent = currentTheme() === 'dark' ? '◑ 라이트' : '◐ 다크';
+
+select(0);
+</script>
+</body>
+</html>

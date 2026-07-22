@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0.0",
+  "note": "RFP 9장 스키마. 감사 콘텐츠는 발주사 SME(회계사) 검수 대상 — 본 파일은 참조구현용 초안이다.",
+  "industries": [
+    {
+      "industry_id": "CONST",
+      "name": "건설업",
+      "ksic_prefixes": ["41", "42"],
+      "macro_indicators": ["미분양 주택 추이", "부동산 PF 익스포저", "주요 원자재 가격"],
+      "risk_items": [
+        {
+          "risk_id": "CONST-R01",
+          "account": "공사수익 / 계약자산(미청구공사)",
+          "assertions": ["발생사실", "정확성", "기간귀속"],
+          "issue": "투입법 진행률(총공사예정원가 추정) 조정을 통한 수익 과대계상, 미청구공사 회수가능성 저하",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 540", "KSA 240"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-CONST-01", "desc": "분기말 진행률 소급 조정 전표", "base_weight": 1.0},
+            {"rule_id": "JE-CONST-02", "desc": "기말 공사원가 대체 전표 집중", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-540-01", "PROC-1115-01", "PROC-1115-02"],
+          "kam_keywords": ["공사수익", "진행률", "미청구공사"]
+        },
+        {
+          "risk_id": "CONST-R02",
+          "account": "우발부채(책임준공ㆍ지급보증)",
+          "assertions": ["완전성", "표시와 공시"],
+          "issue": "PF 관련 신용보강 약정의 주석 공시 누락",
+          "standards": {"kifrs": ["K-IFRS 1037"], "ksa": ["KSA 550"]},
+          "significant_risk_default": false,
+          "je_rules": [],
+          "planned_procedures": ["PROC-550-01", "PROC-1037-01"],
+          "kam_keywords": ["우발부채", "지급보증", "책임준공"]
+        }
+      ]
+    },
+    {
+      "industry_id": "MFG",
+      "name": "제조업",
+      "ksic_prefixes": ["25", "26", "27", "28", "29", "30", "31"],
+      "macro_indicators": ["주요 원자재 가격", "가동률", "수출 단가·환율"],
+      "risk_items": [
+        {
+          "risk_id": "MFG-R01",
+          "account": "재고자산",
+          "assertions": ["실재성", "평가"],
+          "issue": "장기체화·진부화 재고에 대한 평가손실(순실현가능가치) 미반영",
+          "standards": {"kifrs": ["K-IFRS 1002"], "ksa": ["KSA 501", "KSA 540"]},
+          "significant_risk_default": false,
+          "je_rules": [
+            {"rule_id": "JE-MFG-01", "desc": "기말 재고평가충당금 환입 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-501-01", "PROC-1002-01"],
+          "kam_keywords": ["재고자산", "재고", "평가충당금"]
+        },
+        {
+          "risk_id": "MFG-R02",
+          "account": "매출 / 매출채권",
+          "assertions": ["발생사실", "기간귀속"],
+          "issue": "기간귀속 조작(cut-off)을 통한 매출 조기·가공 인식",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 240"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-MFG-02", "desc": "기말 임박 대량 매출전표", "base_weight": 1.0},
+            {"rule_id": "JE-MFG-03", "desc": "기초 역분개(매출 취소) 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1115-03", "PROC-240-01"],
+          "kam_keywords": ["매출", "수익인식", "매출채권"]
+        }
+      ]
+    },
+    {
+      "industry_id": "ITPLAT",
+      "name": "IT·플랫폼",
+      "ksic_prefixes": ["58", "62", "63"],
+      "macro_indicators": ["MAU/트래픽 추이", "광고·커머스 수수료율", "인건비·스톡옵션 비용"],
+      "risk_items": [
+        {
+          "risk_id": "ITPLAT-R01",
+          "account": "수익(총액/순액)",
+          "assertions": ["발생사실", "정확성", "표시와 공시"],
+          "issue": "본인·대리인 판단에 따른 총액/순액 인식 오류(거래규모 과대표시)",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 315", "KSA 330"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-ITPLAT-01", "desc": "총액인식 전환 관련 수동 조정 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1115-04"],
+          "kam_keywords": ["총액", "순액", "본인", "대리인", "수수료"]
+        },
+        {
+          "risk_id": "ITPLAT-R02",
+          "account": "개발비(무형자산)",
+          "assertions": ["실재성", "평가"],
+          "issue": "개발단계 지출의 자산화 요건 미충족·손상 미인식",
+          "standards": {"kifrs": ["K-IFRS 1038", "K-IFRS 1036"], "ksa": ["KSA 540"]},
+          "significant_risk_default": false,
+          "je_rules": [],
+          "planned_procedures": ["PROC-1038-01", "PROC-1036-01"],
+          "kam_keywords": ["개발비", "무형자산", "자산화"]
+        }
+      ]
+    },
+    {
+      "industry_id": "BIO",
+      "name": "바이오·제약",
+      "ksic_prefixes": ["21"],
+      "macro_indicators": ["임상 단계 진척", "라이선스아웃 계약 구조", "현금 소진(runway)"],
+      "risk_items": [
+        {
+          "risk_id": "BIO-R01",
+          "account": "개발비(무형자산)",
+          "assertions": ["실재성", "평가"],
+          "issue": "임상 성공가능성 근거 없는 개발비 자산화 및 손상 미인식",
+          "standards": {"kifrs": ["K-IFRS 1038", "K-IFRS 1036"], "ksa": ["KSA 540"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-BIO-01", "desc": "개발비 자산화·손상환입 수동 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1038-01", "PROC-1036-01", "PROC-540-01"],
+          "kam_keywords": ["개발비", "자산화", "임상"]
+        },
+        {
+          "risk_id": "BIO-R02",
+          "account": "라이선스아웃 수익 / 계약부채",
+          "assertions": ["기간귀속", "정확성"],
+          "issue": "선급 마일스톤·업프론트의 수행의무 배분 및 인식시점 오류",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 540"]},
+          "significant_risk_default": true,
+          "je_rules": [],
+          "planned_procedures": ["PROC-1115-05"],
+          "kam_keywords": ["라이선스", "마일스톤", "업프론트", "계약부채"]
+        },
+        {
+          "risk_id": "BIO-R03",
+          "account": "계속기업(현금 runway)",
+          "assertions": ["표시와 공시"],
+          "issue": "상용화 이전 지속적 현금 소진에 따른 계속기업 불확실성",
+          "standards": {"kifrs": [], "ksa": ["KSA 570"]},
+          "significant_risk_default": false,
+          "je_rules": [],
+          "planned_procedures": ["PROC-570-01"],
+          "kam_keywords": ["계속기업", "자금조달", "유상증자"]
+        }
+      ]
+    },
+    {
+      "industry_id": "RETAIL",
+      "name": "유통",
+      "ksic_prefixes": ["46", "47"],
+      "macro_indicators": ["소비 경기", "재고 회전율", "온라인 침투율"],
+      "risk_items": [
+        {
+          "risk_id": "RETAIL-R01",
+          "account": "매출(반품·에누리·포인트)",
+          "assertions": ["발생사실", "정확성"],
+          "issue": "반품충당부채·고객보상(포인트) 등 변동대가 추정 오류",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 540"]},
+          "significant_risk_default": false,
+          "je_rules": [
+            {"rule_id": "JE-RETAIL-01", "desc": "기말 반품충당부채 환입 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1115-06"],
+          "kam_keywords": ["반품", "포인트", "변동대가", "충당부채"]
+        },
+        {
+          "risk_id": "RETAIL-R02",
+          "account": "재고자산",
+          "assertions": ["실재성", "평가"],
+          "issue": "다점포 재고 실재성 및 시즌성 재고 평가손실",
+          "standards": {"kifrs": ["K-IFRS 1002"], "ksa": ["KSA 501"]},
+          "significant_risk_default": false,
+          "je_rules": [],
+          "planned_procedures": ["PROC-501-01", "PROC-1002-01"],
+          "kam_keywords": ["재고자산", "재고실사"]
+        }
+      ]
+    },
+    {
+      "industry_id": "COSMETIC",
+      "name": "화장품 제조",
+      "ksic_prefixes": ["204"],
+      "macro_indicators": ["중국·면세 채널 수요", "K-뷰티 수출 단가", "브랜드별 재고 회전율", "원료(유지·향료) 가격"],
+      "risk_items": [
+        {
+          "risk_id": "COSM-R01",
+          "account": "매출(반품·에누리·채널 변동대가)",
+          "assertions": ["발생사실", "정확성", "기간귀속"],
+          "issue": "면세·방판·온라인·중국 등 채널별 반품권·에누리·판매장려금 등 변동대가 추정 오류 및 채널 거래구조 변경에 따른 총액/순액·기간귀속 왜곡",
+          "standards": {"kifrs": ["K-IFRS 1115"], "ksa": ["KSA 540", "KSA 240"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-COSM-01", "desc": "기말 반품·에누리 충당부채 환입 전표", "base_weight": 1.0},
+            {"rule_id": "JE-COSM-02", "desc": "기말 임박 대량 채널 매출전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1115-06", "PROC-1115-03", "PROC-240-01"],
+          "kam_keywords": ["매출", "수익인식", "반품", "변동대가", "판매장려금"]
+        },
+        {
+          "risk_id": "COSM-R02",
+          "account": "재고자산(유행·유통기한 민감)",
+          "assertions": ["실재성", "평가"],
+          "issue": "트렌드 변화·사용기한 임박·단종 품목의 순실현가능가치 하락에 대한 평가손실(진부화) 미반영",
+          "standards": {"kifrs": ["K-IFRS 1002"], "ksa": ["KSA 501", "KSA 540"]},
+          "significant_risk_default": false,
+          "je_rules": [
+            {"rule_id": "JE-COSM-03", "desc": "기말 재고평가충당금 환입 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-501-01", "PROC-1002-01"],
+          "kam_keywords": ["재고자산", "재고", "평가충당금", "진부화"]
+        },
+        {
+          "risk_id": "COSM-R03",
+          "account": "영업권·무형자산(브랜드)",
+          "assertions": ["실재성", "평가", "표시와 공시"],
+          "issue": "브랜드·자회사 인수(사업결합)에서 인식한 영업권·브랜드의 현금창출단위 배분 및 손상 검사 추정(할인율·성장률) 오류",
+          "standards": {"kifrs": ["K-IFRS 1036", "K-IFRS 1103"], "ksa": ["KSA 540"]},
+          "significant_risk_default": true,
+          "je_rules": [
+            {"rule_id": "JE-COSM-04", "desc": "영업권·무형자산 손상·환입 수동 전표", "base_weight": 1.0}
+          ],
+          "planned_procedures": ["PROC-1036-01", "PROC-540-01"],
+          "kam_keywords": ["영업권", "손상", "무형자산", "브랜드", "사업결합"]
+        },
+        {
+          "risk_id": "COSM-R04",
+          "account": "특수관계자 거래·연결 내부거래",
+          "assertions": ["완전성", "정확성", "표시와 공시"],
+          "issue": "계열사·해외 종속회사와의 내부거래 미제거 및 특수관계자 지원성 거래의 공시 누락",
+          "standards": {"kifrs": ["K-IFRS 1110", "K-IFRS 1024"], "ksa": ["KSA 550"]},
+          "significant_risk_default": false,
+          "je_rules": [],
+          "planned_procedures": ["PROC-550-01"],
+          "kam_keywords": ["특수관계자", "내부거래", "연결", "부당지원"]
+        }
+      ]
+    }
+  ]
+}

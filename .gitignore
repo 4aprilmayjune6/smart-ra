@@ -1,0 +1,38 @@
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── 가상환경 ───────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── 비밀정보 / 환경변수 (DART 인증키는 절대 커밋 금지) ──
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets*.json
+
+# ── 작업 산출물(재생성 가능) — 배포본은 web/ 에 큐레이션 커밋 ──
+output/
+
+# ── OS / 편집기 ───────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ── Vercel ────────────────────────────────────────────
+.vercel/

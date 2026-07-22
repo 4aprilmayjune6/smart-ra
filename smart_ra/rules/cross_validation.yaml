@@ -1,0 +1,118 @@
+# 교차검증 룰셋 (SFR-401) — 모듈 1·2·3 신호의 수렴 패턴 → 핵심위험(KeyRisk).
+# 선언적 DSL. Git 버전관리·SME 승인 후 활성화(참조구현은 초안).
+#
+# 조건 DSL:
+#   when:
+#     all: [ <cond>, ... ]      # 모두 만족
+#     any: [ <cond>, ... ]      # 하나 이상
+#   <cond> (leaf):
+#     signal: "M3.OVERALL"      # {module}.{category} 매칭
+#     severity_in: [RED]        # (선택) 신호 severity 필터
+#     params: { count_12m: ">=3", keyword_id_in: [EMBEZZLEMENT] }  # (선택) metrics 조건
+#   또는 { always: true }
+#
+# then.key_risk: 핵심위험 카드 정의. rationale_template 의 {signals} 는 기여 신호 제목으로 치환.
+version: "0.1.0"
+
+rules:
+  - rule_id: XV-BASE-01
+    name: 경영진의 통제무력화 위험(상시 유의적 위험)
+    when: { always: true }
+    then:
+      key_risk:
+        title: 경영진의 내부통제 무력화 위험
+        significant_risk_candidate: true
+        accounts: ["수동전표", "회계추정치", "비경상 거래"]
+        assertions: ["발생사실", "정확성", "기간귀속"]
+        standards: ["KSA 240"]
+        procedures: ["PROC-240-01"]
+        jet_updates:
+          - { rule_id: "JE-GEN-01", weight_multiplier: 1.2, reason: "KSA 240 상시 통제무력화 대응" }
+        rationale_template: "KSA 240 문단 31에 따라 경영진의 통제무력화 위험은 모든 감사에서 유의적 위험으로 간주한다."
+
+  - rule_id: XV-001
+    name: 계속기업 압박 하의 이익조정 유인
+    when:
+      all:
+        - { signal: "M3.OVERALL", severity_in: [RED] }
+        - any:
+            - { signal: "M1.AUDITOR_CHANGE" }
+            - { signal: "M1.CORRECTION_FREQ", params: { count_12m: ">=3" } }
+    then:
+      key_risk:
+        title: 계속기업 압박에 따른 경영진 편의(이익조정) 위험
+        significant_risk_candidate: true
+        accounts: ["수익", "매출채권", "재고자산", "이연법인세자산"]
+        assertions: ["발생사실", "기간귀속", "평가"]
+        standards: ["KSA 240", "KSA 570", "KSA 540"]
+        procedures: ["PROC-240-01", "PROC-540-01", "PROC-570-01"]
+        jet_updates:
+          - { rule_id: "JE-R-08", weight_multiplier: 1.5, reason: "기말 대량 수동전표" }
+          - { rule_id: "JE-R-12", weight_multiplier: 2.0, reason: "수익계정 역분개" }
+        rationale_template: "계속기업 불확실성(모듈3)과 공시 신뢰성 저하 신호가 수렴한다. 근거: {signals}"
+
+  - rule_id: XV-002
+    name: 부정 정황(횡령·배임)에 따른 자산 유용·재무제표 신뢰성 위험
+    when:
+      any:
+        - { signal: "M1.RISK_KEYWORD", params: { keyword_id_in: [EMBEZZLEMENT, BREACH_OF_TRUST] } }
+    then:
+      key_risk:
+        title: 자산의 부정한 유용 및 부정한 재무보고 위험
+        significant_risk_candidate: true
+        accounts: ["현금및현금성자산", "대여금", "기타자산", "특수관계자 거래"]
+        assertions: ["실재성", "발생사실"]
+        standards: ["KSA 240", "KSA 550"]
+        procedures: ["PROC-240-01", "PROC-550-01"]
+        jet_updates:
+          - { rule_id: "JE-R-05", weight_multiplier: 1.8, reason: "현금·대여금 관련 비경상 전표" }
+        rationale_template: "횡령·배임 관련 공시가 확인된다. 근거: {signals}"
+
+  - rule_id: XV-003
+    name: 소송·우발부채에 따른 완전성·공시 위험
+    when:
+      any:
+        - { signal: "M1.RISK_KEYWORD", params: { keyword_id_in: [LAWSUIT] } }
+    then:
+      key_risk:
+        title: 우발부채(소송)의 완전성 및 공시 위험
+        significant_risk_candidate: false
+        accounts: ["충당부채", "우발부채"]
+        assertions: ["완전성", "표시와 공시"]
+        standards: ["KSA 550", "K-IFRS 1037"]
+        procedures: ["PROC-550-01", "PROC-1037-01"]
+        jet_updates: []
+        rationale_template: "소송 관련 공시가 확인된다. 근거: {signals}"
+
+  - rule_id: XV-004
+    name: 감사인 독립성 저하 정황
+    when:
+      all:
+        - { signal: "M1.NON_AUDIT_FEE", severity_in: [YELLOW, RED] }
+        - { signal: "M1.AUDITOR_CHANGE" }
+    then:
+      key_risk:
+        title: 감사인 독립성 및 감사 품질 저하 정황(의견구매 위험)
+        significant_risk_candidate: false
+        accounts: []
+        assertions: []
+        standards: ["KSA 220", "KSA 315"]
+        procedures: []
+        jet_updates: []
+        rationale_template: "비감사보수 비중 과다와 자유선임 감사인 변경이 함께 관찰된다. 근거: {signals}"
+
+  - rule_id: XV-005
+    name: 계속기업 불확실성 대응
+    when:
+      any:
+        - { signal: "M3.OVERALL", severity_in: [RED, YELLOW] }
+    then:
+      key_risk:
+        title: 계속기업 가정의 불확실성
+        significant_risk_candidate: false
+        accounts: ["자산 전반(회수가능성)", "부채(만기)"]
+        assertions: ["평가", "표시와 공시"]
+        standards: ["KSA 570"]
+        procedures: ["PROC-570-01"]
+        jet_updates: []
+        rationale_template: "계속기업 스코어링(모듈3) 결과 유의적 신호가 관찰된다. 근거: {signals}"

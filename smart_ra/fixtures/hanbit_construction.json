@@ -1,0 +1,101 @@
+{
+  "corp_code": "90000001",
+  "corp_name": "한빛건설",
+  "stock_code": "900001",
+  "ksic_code": "41210",
+  "disclosures": [
+    {
+      "rcept_no": "20240331000102",
+      "report_nm": "사업보고서 (2023.12)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240331",
+      "corrected": false,
+      "body": "제53기 사업보고서. 회사의 개요 및 사업의 내용, 재무에 관한 사항을 포함합니다."
+    },
+    {
+      "rcept_no": "20240315000101",
+      "report_nm": "소송등의제기ㆍ신청(일정금액이상의청구)",
+      "pblntf_ty": "B",
+      "rcept_dt": "20240315",
+      "corrected": false,
+      "body": "당사는 협력업체 OO건설로부터 공사대금 및 손해배상 청구 소송이 제기되었습니다. 소송가액은 자기자본의 10%를 초과합니다. 본 소송의 결과에 따라 우발부채가 현실화될 수 있습니다."
+    },
+    {
+      "rcept_no": "20240520000201",
+      "report_nm": "[기재정정]사업보고서 (2023.12)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240520",
+      "corrected": true,
+      "correction_reason": "재무제표 주석 중 특수관계자 거래 및 우발부채 기재사항 정정",
+      "body": "정정 후 사업보고서."
+    },
+    {
+      "rcept_no": "20240610000202",
+      "report_nm": "[기재정정]분기보고서 (2024.03)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240610",
+      "corrected": true,
+      "correction_reason": "매출채권 대손충당금 산정 오류 정정",
+      "body": "정정 후 분기보고서."
+    },
+    {
+      "rcept_no": "20240808000203",
+      "report_nm": "[기재정정]반기보고서 (2024.06)",
+      "pblntf_ty": "A",
+      "rcept_dt": "20240808",
+      "corrected": true,
+      "correction_reason": "공사진행률 재산정에 따른 수익 정정",
+      "body": "정정 후 반기보고서."
+    },
+    {
+      "rcept_no": "20240902000301",
+      "report_nm": "횡령ㆍ배임혐의발생",
+      "pblntf_ty": "I",
+      "rcept_dt": "20240902",
+      "corrected": false,
+      "body": "전 대표이사 등에 대하여 업무상 횡령 및 배임 혐의가 발생하였습니다. 혐의금액은 회사 자기자본 대비 유의적인 수준이며, 수사 결과에 따라 재무제표에 영향을 미칠 수 있습니다."
+    },
+    {
+      "rcept_no": "20240415000401",
+      "report_nm": "감사보고서제출",
+      "pblntf_ty": "F",
+      "rcept_dt": "20240415",
+      "corrected": false,
+      "body": "외부감사인의 감사보고서. 감사의견 적정. 강조사항으로 계속기업 관련 중요한 불확실성 기재."
+    }
+  ],
+  "audits": [
+    {"fiscal_year": 2020, "auditor": "가나회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["공사수익 진행기준 인식"], "audit_fee": 250, "non_audit_fee": 30,
+     "rcept_no": "20210330000001"},
+    {"fiscal_year": 2021, "auditor": "가나회계법인", "opinion": "적정", "change_type": "none",
+     "going_concern_para": false, "kam": ["공사수익 진행기준 인식"], "audit_fee": 260, "non_audit_fee": 40,
+     "rcept_no": "20220330000001"},
+    {"fiscal_year": 2022, "auditor": "다라회계법인", "opinion": "적정", "change_type": "free",
+     "going_concern_para": false, "kam": ["공사수익 진행기준 인식", "미청구공사 회수가능성"],
+     "audit_fee": 280, "non_audit_fee": 120, "rcept_no": "20230330000001"},
+    {"fiscal_year": 2023, "auditor": "마바회계법인", "opinion": "적정", "change_type": "free",
+     "going_concern_para": true,
+     "emphasis_paras": ["계속기업 관련 중요한 불확실성 — 계속된 영업손실 및 유동성 부족"],
+     "kam": ["공사수익 진행기준 인식", "미청구공사 및 매출채권 회수가능성", "계속기업 가정"],
+     "audit_fee": 300, "non_audit_fee": 200, "rcept_no": "20240415000401"}
+  ],
+  "financials": [
+    {"year": 2020, "basis": "CFS", "revenue": 500000, "operating_income": 20000, "interest_expense": 8000,
+     "operating_cash_flow": 15000, "current_assets": 300000, "current_liabilities": 250000,
+     "total_assets": 950000, "total_liabilities": 700000, "total_equity": 250000, "capital_stock": 100000, "cash": 40000},
+    {"year": 2021, "basis": "CFS", "revenue": 480000, "operating_income": 10000, "interest_expense": 9000,
+     "operating_cash_flow": -5000, "current_assets": 290000, "current_liabilities": 280000,
+     "total_assets": 970000, "total_liabilities": 750000, "total_equity": 220000, "capital_stock": 100000, "cash": 35000},
+    {"year": 2022, "basis": "CFS", "revenue": 450000, "operating_income": 3000, "interest_expense": 10000,
+     "operating_cash_flow": -12000, "current_assets": 270000, "current_liabilities": 300000,
+     "total_assets": 1000000, "total_liabilities": 820000, "total_equity": 180000, "capital_stock": 100000, "cash": 30000},
+    {"year": 2023, "basis": "CFS", "revenue": 420000, "operating_income": 1000, "interest_expense": 11000,
+     "operating_cash_flow": -18000, "current_assets": 250000, "current_liabilities": 340000,
+     "total_assets": 1030000, "total_liabilities": 900000, "total_equity": 130000, "capital_stock": 100000, "cash": 25000},
+    {"year": 2024, "basis": "CFS", "revenue": 400000, "operating_income": -5000, "interest_expense": 12000,
+     "operating_cash_flow": -25000, "current_assets": 230000, "current_liabilities": 380000,
+     "total_assets": 1070000, "total_liabilities": 980000, "total_equity": 90000, "capital_stock": 100000, "cash": 20000}
+  ],
+  "parse_issues": []
+}

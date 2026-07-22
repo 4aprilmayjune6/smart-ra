@@ -1,0 +1,65 @@
+# 모듈1 위험 키워드 사전 (SFR-101, SFR-109)
+# 관리자 UI로 CRUD·버전관리하는 대상. 코드 배포 없이 반영(NFR-MNT-01).
+# severity: RED(부정·우발위험) / YELLOW
+# synonyms: 활용형·복합어 매칭용. exclude: 부정 문맥 제외(예: "해당사항 없음").
+
+version: "0.1.0"
+
+# 공통 부정 문맥(전체 키워드에 적용). 매칭 부위 주변에 존재하면 제외.
+global_excludes:
+  - "해당사항 없음"
+  - "해당사항이 없"
+  - "해당 없음"
+  - "기재하지 않"
+
+keywords:
+  - id: LAWSUIT
+    label: 소송
+    severity: RED
+    standard_refs: ["KSA 550", "K-IFRS 1037"]
+    synonyms: ["소송", "제소", "손해배상청구", "가처분", "지급명령"]
+  - id: EMBEZZLEMENT
+    label: 횡령
+    severity: RED
+    standard_refs: ["KSA 240"]
+    synonyms: ["횡령", "유용", "공금유용"]
+  - id: BREACH_OF_TRUST
+    label: 배임
+    severity: RED
+    standard_refs: ["KSA 240"]
+    synonyms: ["배임", "배임수재", "특정경제범죄"]
+  - id: DEFAULT
+    label: 부도
+    severity: RED
+    standard_refs: ["KSA 570"]
+    synonyms: ["부도", "당좌거래정지", "은행거래정지"]
+  - id: BIZ_SUSPENSION
+    label: 영업정지
+    severity: RED
+    standard_refs: ["KSA 570"]
+    synonyms: ["영업정지", "영업정지처분"]
+  - id: CONTRACT_TERMINATION
+    label: 계약해지
+    severity: RED
+    standard_refs: ["KSA 570"]
+    synonyms: ["공급계약 해지", "계약해지", "단일판매ㆍ공급계약 해지", "수주취소"]
+  - id: REHABILITATION
+    label: 회생·파산
+    severity: RED
+    standard_refs: ["KSA 570"]
+    synonyms: ["회생절차", "기업회생", "법정관리", "파산신청", "파산선고"]
+  - id: CAPITAL_REDUCTION
+    label: 감자
+    severity: YELLOW
+    standard_refs: ["KSA 570"]
+    synonyms: ["무상감자", "감자결정"]
+  - id: UNFAITHFUL_DISCLOSURE
+    label: 불성실공시
+    severity: YELLOW
+    standard_refs: ["KSA 315"]
+    synonyms: ["불성실공시법인", "공시불이행", "공시번복"]
+  - id: MANAGEMENT_ITEM
+    label: 관리종목
+    severity: YELLOW
+    standard_refs: ["KSA 570"]
+    synonyms: ["관리종목 지정", "상장적격성 실질심사"]
