@@ -14,7 +14,7 @@ import re
 import sys
 import traceback
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import unquote_to_bytes, urlparse
 
 # 번들에 포함된 smart_ra 패키지를 임포트 경로에 추가(vercel.json includeFiles).
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -23,6 +23,26 @@ if str(_ROOT) not in sys.path:
 
 _ACCENT = "#1f3a5f"
 _YEAR_MIN, _YEAR_MAX = 2015, 2025
+
+
+def _decode_param(query: str, key: str) -> str:
+    """퍼센트 인코딩된 쿼리에서 key 값을 raw 바이트로 언쿼트 후 인코딩 자동판별.
+
+    브라우저(fetch)는 UTF-8, 일부 클라이언트(cp949 셸의 curl 등)는 EUC-KR로 인코딩한다.
+    parse_qs의 UTF-8 강제 디코딩은 cp949 바이트를 손실(U+FFFD)시키므로 직접 처리한다.
+    """
+    for pair in query.split("&"):
+        k, _, v = pair.partition("=")
+        if k != key:
+            continue
+        raw = unquote_to_bytes(v.replace("+", " "))
+        for enc in ("utf-8", "cp949", "euc-kr"):
+            try:
+                return raw.decode(enc)
+            except UnicodeDecodeError:
+                continue
+        return raw.decode("utf-8", "replace")
+    return ""
 
 
 def _now_kst() -> str:
@@ -111,9 +131,9 @@ def analyze(name: str, year: int) -> tuple[int, str]:
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):  # noqa: N802 (Vercel 규약)
         try:
-            qs = parse_qs(urlparse(self.path).query)
-            name = (qs.get("q") or qs.get("name") or [""])[0].strip()[:80]
-            year_raw = (qs.get("year") or [""])[0].strip()
+            query = urlparse(self.path).query
+            name = (_decode_param(query, "q") or _decode_param(query, "name")).strip()[:80]
+            year_raw = _decode_param(query, "year").strip()
 
             if not name:
                 return self._send(400, _error_page(

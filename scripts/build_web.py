@@ -100,8 +100,14 @@ def main() -> None:
             (WEB / dst).write_bytes(data)
             print(f"  copy  {name:26s} → web/{dst}")
 
-    (WEB / "index.html").write_text(render_index(cards), encoding="utf-8")
-    print(f"  index web/index.html ({len(cards)} 카드)")
+    # index.html 은 실시간 검색 UI(api/analyze)를 손으로 유지한다. 이미 검색 폼이
+    # 들어 있으면 덮어쓰지 않는다(정적 재빌드가 동적 기능을 지우지 않도록).
+    index_path = WEB / "index.html"
+    if index_path.exists() and 'id="analyzeForm"' in index_path.read_text(encoding="utf-8"):
+        print("  index web/index.html — 검색 UI 유지(재생성 건너뜀)")
+    else:
+        index_path.write_text(render_index(cards), encoding="utf-8")
+        print(f"  index web/index.html ({len(cards)} 카드)")
     # 노-크롤 보조
     (WEB / "robots.txt").write_text("User-agent: *\nAllow: /\n", encoding="utf-8")
     print("완료 → web/")
