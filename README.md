@@ -97,15 +97,25 @@ claude mcp add smart-ra -- <절대경로>/.venv/Scripts/python.exe -m smart_ra.m
 
 ## 웹 쇼케이스 · 배포 (GitHub · Vercel)
 
-- **GitHub**: 저장소 전체(MCP 서버·엔진·CLI·테스트)를 올린다. DART 인증키는 환경변수로만 쓰며
+라이브: **https://smart-ra.vercel.app** · 소스: **https://github.com/4aprilmayjune6/smart-ra**
+
+- **GitHub**: 저장소 전체(MCP 서버·엔진·CLI·테스트·웹)를 올린다. DART 인증키는 환경변수로만 쓰며
   `.gitignore`(`.env`·`.venv/`·`output/`)로 커밋에서 제외한다. `.env.example` 참조.
-- **Vercel**: 산출물 **정적 쇼케이스**만 배포한다. `python scripts/build_web.py` 가 `output/` 의
-  메모·대시보드·RFP를 완전한 HTML 문서로 감싸 `web/` 에 큐레이션하고 랜딩(`web/index.html`)을 만든다.
-  `vercel.json` 이 `outputDirectory: web` 로 무빌드 정적 배포를 지정한다(인증키 불필요).
+- **Vercel**: 두 부분을 함께 배포한다.
+  - **정적 쇼케이스** — `python scripts/build_web.py` 가 `output/` 의 메모·대시보드·RFP를 완전한
+    HTML 문서로 감싸 `web/` 에 큐레이션한다(`vercel.json` `outputDirectory: web`).
+  - **실시간 동적 검색** — `api/analyze.py`(회사·연도 → 실시간 DART 수집·분석 → 메모 HTML),
+    `api/companies.py`(상장사 자동완성)의 **Python 서버리스 함수**. 랜딩(`web/index.html`)의 검색창이
+    호출한다. `vercel.json` `functions.includeFiles` 로 `smart_ra` 엔진을 번들한다(`requirements.txt`,
+    mcp 제외 경량).
+
+**실데이터(실제 상장사) 활성화**: Vercel 프로젝트에 환경변수 `SMARTRA_DART_API_KEY`(OpenDART 인증키)를
+설정하면 rest 모드로 전환돼 임의 상장사를 분석한다. 미설정 시 fixture 샘플 3사만 동작한다. 키는
+**서버 환경변수로만** 두며 코드·응답·커밋에 넣지 않는다(NFR-SEC-04).
 
 ```bash
-python scripts/build_web.py     # output/ → web/ (래핑·랜딩·키 스캔)
-# 이후 GitHub push → Vercel 자동 배포
+python scripts/build_web.py     # output/ → web/ (래핑·랜딩·키 스캔). 검색 UI 있는 index.html 은 보존
+# 이후 GitHub push → Vercel 자동 재배포
 ```
 
 상세 절차는 [`DEPLOY.md`](DEPLOY.md) 참조.
