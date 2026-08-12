@@ -92,34 +92,55 @@ Vercel은 push마다 자동 재배포한다.
 
 ---
 
-## 4. 실시간 동적 검색 활성화 (DART 키)
+## 4. 실시간 동적 검색 (아키텍처 · 활성화)
 
-랜딩(`/`)의 검색창은 `api/analyze.py`(회사·연도 → 실시간 DART 수집·분석 → 메모 HTML)와
-`api/companies.py`(상장사 자동완성)를 호출한다. **환경변수 `SMARTRA_DART_API_KEY` 미설정 시**
-fixture 샘플 3사(한빛건설·대양제조·제노바이오)만 동작하고, **설정 시** 임의 상장사를 분석한다.
+랜딩(`/`)의 검색창 흐름:
+
+```
+정적 web/companies.json (회사명·종목코드 → corp_code)   ← 자동완성·클라이언트 해석
+        │  선택 시 corp_code 전송
+        ▼
+GET /api/analyze?corp=<corp_code>&year=<YYYY>          ← api/analyze.py (서버리스)
+        │  register_by_corp_code → 병렬 DART 수집 → 결정론 엔진 → 메모 HTML
+        ▼
+        메모 HTML (iframe 표시)
+```
+
+**설계 제약과 대응**:
+- **corpCode.xml(약 3.6MB)은 서버리스에서 못 받는다** — DART가 클라우드 IP로의 대용량 전송을
+  ~14KB/s로 스로틀해 60초 함수 한도를 초과(≈256초). 그래서 회사명↔corp_code 매핑은 **정적
+  `web/companies.json`** 으로 두고, 분석은 **corp_code 로 직접**(작은 호출만) 수행한다.
+- **HTTP 는 표준 라이브러리 urllib** 사용 — httpx 는 Vercel 런타임에서 요청이 멈춘다.
+- 개별 DART 호출(공시·연도별 재무·감사)은 **ThreadPoolExecutor 로 병렬** 수집 → 실데이터 메모
+  약 5~15초.
+
+### 4-1. DART 키 설정 (Vercel 환경변수)
 
 키는 **서버 환경변수로만** 둔다(코드·응답·커밋 금지, NFR-SEC-04). 채팅·화면에 노출된 키는 폐기하고
 [opendart.fss.or.kr](https://opendart.fss.or.kr/) 에서 **재발급**한 새 키를 쓴다.
 
-### 방법 A — Vercel 대시보드 (권장)
+- **대시보드**: 프로젝트 **smart-ra → Settings → Environment Variables** → Key `SMARTRA_DART_API_KEY`,
+  Value `<재발급 키>`, **Production** → Save → **Redeploy**(env 변경은 재배포 후 반영).
+- **CLI**: `vercel env add SMARTRA_DART_API_KEY production` (프롬프트에 키 붙여넣기) → `vercel deploy --prod`.
 
-1. 프로젝트 **smart-ra → Settings → Environment Variables**
-2. Key `SMARTRA_DART_API_KEY`, Value `<재발급한 인증키>`, Environments: **Production**(필요 시 Preview·Development도)
-3. **Save** → 프로젝트를 **Redeploy**(env 변경은 재배포 후 반영)
+### 4-2. 상장사 목록 생성 (`web/companies.json`)
 
-### 방법 B — Vercel CLI
+corpCode.xml 은 **로컬(국내 IP)** 에서 한 번 받아 정적 목록으로 만든다(저장소엔 기본으로 삼성전자
+시드만 들어 있다). 회원 터미널에서:
 
 ```bash
-vercel env add SMARTRA_DART_API_KEY production   # 프롬프트에 키 붙여넣기(값은 저장소로 안 감)
-vercel deploy --prod                             # 재배포로 반영
+# 키는 로컬 환경변수로만(저장소로 안 감)
+$env:SMARTRA_DART_API_KEY="<재발급 키>"        # PowerShell
+.venv\Scripts\python scripts\gen_companies.py  # → web/companies.json (상장사 전체)
+git add web/companies.json && git commit -m "상장사 목록 갱신" && git push
 ```
 
 ### 확인
 
 ```bash
-curl "https://<프로젝트>.vercel.app/api/analyze?q=삼성전자&year=2024"   # 실데이터 메모 HTML
-curl "https://<프로젝트>.vercel.app/api/companies"                      # 상장사 목록(JSON)
+curl "https://<프로젝트>.vercel.app/companies.json"                         # 상장사 목록(정적)
+curl "https://<프로젝트>.vercel.app/api/analyze?corp=00126380&year=2024"    # 삼성전자 실데이터 메모
 ```
 
 > 공개 엔드포인트이므로 남용 시 일일 쿼터(약 20,000건) 소모에 유의한다. 트래픽이 커지면
-> per-IP rate-limit·결과 캐시 도입을 권장한다(현재 corpCode.xml 은 프로세스 캐시).
+> per-IP rate-limit·결과 캐시 도입을 권장한다.

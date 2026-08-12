@@ -104,14 +104,15 @@ claude mcp add smart-ra -- <절대경로>/.venv/Scripts/python.exe -m smart_ra.m
 - **Vercel**: 두 부분을 함께 배포한다.
   - **정적 쇼케이스** — `python scripts/build_web.py` 가 `output/` 의 메모·대시보드·RFP를 완전한
     HTML 문서로 감싸 `web/` 에 큐레이션한다(`vercel.json` `outputDirectory: web`).
-  - **실시간 동적 검색** — `api/analyze.py`(회사·연도 → 실시간 DART 수집·분석 → 메모 HTML),
-    `api/companies.py`(상장사 자동완성)의 **Python 서버리스 함수**. 랜딩(`web/index.html`)의 검색창이
-    호출한다. `vercel.json` `functions.includeFiles` 로 `smart_ra` 엔진을 번들한다(`requirements.txt`,
-    mcp 제외 경량).
+  - **실시간 동적 검색** — `api/analyze.py`(corp_code·연도 → 병렬 DART 수집·분석 → 메모 HTML)
+    **Python 서버리스 함수**. 랜딩(`web/index.html`) 검색창이 정적 `web/companies.json`(회사명↔corp_code)
+    으로 자동완성·해석한 뒤 corp_code 로 호출한다. `vercel.json` `functions.includeFiles` 로 `smart_ra`
+    엔진을 번들한다(`requirements.txt`, mcp·httpx 제외 경량 / HTTP 는 urllib).
 
-**실데이터(실제 상장사) 활성화**: Vercel 프로젝트에 환경변수 `SMARTRA_DART_API_KEY`(OpenDART 인증키)를
-설정하면 rest 모드로 전환돼 임의 상장사를 분석한다. 미설정 시 fixture 샘플 3사만 동작한다. 키는
-**서버 환경변수로만** 두며 코드·응답·커밋에 넣지 않는다(NFR-SEC-04).
+**실데이터(실제 상장사) 활성화**: ① Vercel 환경변수 `SMARTRA_DART_API_KEY`(OpenDART 인증키) 설정 →
+rest 모드 전환, ② `scripts/gen_companies.py` 로 로컬에서 `web/companies.json`(상장사 전체) 생성.
+corpCode.xml(3.6MB)은 서버리스 대역폭 제약으로 런타임에 못 받으므로 목록은 정적·분석은 corp_code
+직접 방식이다. 키는 **서버/로컬 환경변수로만** 두며 코드·응답·커밋에 넣지 않는다(NFR-SEC-04).
 
 ```bash
 python scripts/build_web.py     # output/ → web/ (래핑·랜딩·키 스캔). 검색 UI 있는 index.html 은 보존
