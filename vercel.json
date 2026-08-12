@@ -6,6 +6,10 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/analyze.py": { "includeFiles": "smart_ra/**", "maxDuration": 60 },
+    "api/companies.py": { "includeFiles": "smart_ra/**", "maxDuration": 60 }
+  },
   "headers": [
     {
       "source": "/(.*)",

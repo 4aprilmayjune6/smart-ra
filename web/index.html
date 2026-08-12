@@ -53,6 +53,39 @@
     font-size:.8rem;line-height:1.7}
   footer code{font-family:var(--mono);color:var(--muted)}
   a.src{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+  /* 실시간 검색 */
+  .search{background:var(--sheet);border:1px solid var(--rule);border-left:5px solid var(--accent);
+    border-radius:14px;padding:24px 24px 20px;margin-top:28px}
+  .search h2{margin:0 0 5px;font-size:1.12rem}
+  .search .sub{color:var(--muted);font-size:.9rem;margin:0 0 18px;max-width:66ch}
+  .form{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.grow{flex:1;min-width:230px}
+  .field label{font-size:.7rem;font-weight:700;letter-spacing:.05em;color:var(--faint);text-transform:uppercase}
+  .field input,.field select{font-family:var(--sans);font-size:1rem;color:var(--ink);
+    background:var(--paper);border:1px solid var(--rule-strong);border-radius:9px;padding:11px 13px;
+    outline:none;transition:border-color .15s}
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .btn{font-family:var(--sans);font-size:1rem;font-weight:700;color:#fff;background:var(--accent);
+    border:none;border-radius:9px;padding:12px 24px;cursor:pointer;transition:filter .15s}
+  .btn:hover{filter:brightness(1.09)} .btn:disabled{opacity:.55;cursor:progress}
+  .samplechips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+  .chip{font-size:.8rem;color:var(--accent);background:var(--accent-soft);border:1px solid var(--rule-strong);
+    border-radius:999px;padding:5px 12px;cursor:pointer;transition:border-color .15s}
+  .chip:hover{border-color:var(--accent)}
+  .hintline{color:var(--faint);font-size:.78rem;margin:14px 0 0;line-height:1.55}
+  .result{margin-top:22px;display:none}
+  .result.show{display:block}
+  .rbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .rbar .status{font-size:.88rem;color:var(--muted);font-weight:600}
+  .rbar a.newtab{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none;
+    border:1px solid var(--rule-strong);border-radius:7px;padding:5px 12px}
+  .rbar a.newtab:hover{border-color:var(--accent)}
+  iframe.memo{width:100%;border:1px solid var(--rule);border-radius:12px;background:#fff;min-height:540px}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--rule-strong);
+    border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;
+    vertical-align:-2px;margin-right:7px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -67,11 +100,41 @@
         <span class="badge">K-IFRS 1115·1036·1002</span>
         <span class="badge">MCP 서버(16종 도구)</span>
         <span class="badge">결정론 · 재현가능</span>
-        <span class="badge">자동생성 초안(SFR-405)</span>
+        <span class="badge">실시간 DART 분석</span>
       </div>
     </header>
+
+    <section class="search" id="search">
+      <h2>회사·연도로 실시간 위험평가</h2>
+      <p class="sub">회사명 또는 종목코드와 사업연도를 입력하면, OpenDART 실공시를 그 자리에서 수집해
+      결정론 엔진으로 위험평가 메모를 생성합니다.</p>
+      <form class="form" id="analyzeForm">
+        <div class="field grow">
+          <label for="q">회사명 · 종목코드</label>
+          <input id="q" name="q" list="companyList" autocomplete="off"
+                 placeholder="예: 삼성전자 · 005930" required>
+          <datalist id="companyList"></datalist>
+        </div>
+        <div class="field">
+          <label for="year">사업연도</label>
+          <select id="year" name="year"></select>
+        </div>
+        <button class="btn" id="goBtn" type="submit">분석 →</button>
+      </form>
+      <div class="samplechips" id="chips"></div>
+      <p class="hintline" id="hint">실시간 DART 수집이라 처음엔 10~20초 걸릴 수 있습니다.
+      · 판정(신호등·계속기업·핵심위험)은 서버 결정론 룰, 서술은 근거 인용 기반입니다.</p>
+      <div class="result" id="result">
+        <div class="rbar">
+          <span class="status" id="rstatus"></span>
+          <a class="newtab" id="newtab" href="#" target="_blank" rel="noopener">전체 화면으로 열기 ↗</a>
+        </div>
+        <iframe class="memo" id="memo" title="위험평가 메모"></iframe>
+      </div>
+    </section>
+
     <section>
-      <div class="sec-h"><h2>실데이터 메모</h2><span>OpenDART 실공시 기반 · 외부 공개정보(기사·감리선례) 편입</span></div>
+      <div class="sec-h"><h2>실데이터 메모 (예시)</h2><span>미리 생성한 산출물 — 위 검색으로 직접 만들 수도 있습니다 · 외부 공개정보(기사·감리선례) 편입</span></div>
       <div class="grid"><a class="card featured" href="memo-amore-2025.html">
         <div class="ctag">실데이터 + 외부신호</div>
         <h3>아모레퍼시픽 · FY2025</h3>
@@ -128,5 +191,60 @@
       소스코드 · MCP 서버: <a class="src" href="https://github.com/4aprilmayjune6/smart-ra">GitHub 저장소</a> · 룰 <code>risk-rules@0.1.0</code>
     </footer>
   </div>
+  <script>
+  (function(){
+    var YEARS=[2025,2024,2023,2022,2021,2020,2019,2018,2017,2016,2015];
+    var DEFAULT=2024;
+    var sel=document.getElementById('year');
+    YEARS.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y+'년';
+      if(y===DEFAULT)o.selected=true;sel.appendChild(o);});
+
+    var q=document.getElementById('q');
+    var btn=document.getElementById('goBtn');
+    var result=document.getElementById('result');
+    var memo=document.getElementById('memo');
+    var rstatus=document.getElementById('rstatus');
+    var newtab=document.getElementById('newtab');
+
+    // 빠른 예시 칩
+    var samples=[['삼성전자',2024],['아모레퍼시픽',2025],['SK하이닉스',2024],['현대자동차',2024],['NAVER',2024]];
+    var chips=document.getElementById('chips');
+    samples.forEach(function(s){var c=document.createElement('span');c.className='chip';
+      c.textContent=s[0]+' '+s[1];
+      c.onclick=function(){q.value=s[0];sel.value=String(s[1]);run();};chips.appendChild(c);});
+
+    // 자동완성(상장사 목록) — 실패해도 자유입력 가능
+    fetch('/api/companies').then(function(r){return r.json();}).then(function(d){
+      var dl=document.getElementById('companyList');
+      var list=(d.companies||[]).slice(0,4000);
+      var frag=document.createDocumentFragment();
+      list.forEach(function(c){var o=document.createElement('option');o.value=c.name;
+        if(c.stock)o.label=c.stock;frag.appendChild(o);});
+      dl.appendChild(frag);
+    }).catch(function(){});
+
+    function run(){
+      var name=q.value.trim(); var y=sel.value;
+      if(!name){q.focus();return;}
+      var url='/api/analyze?q='+encodeURIComponent(name)+'&year='+encodeURIComponent(y);
+      btn.disabled=true; result.classList.add('show');
+      newtab.href=url;
+      rstatus.innerHTML='<span class="spinner"></span>'+name+' · '+y+'년 분석 중… (실시간 DART 수집, 최대 20초)';
+      memo.style.height='540px';
+      result.scrollIntoView({behavior:'smooth',block:'start'});
+      fetch(url).then(function(r){return r.text();}).then(function(html){
+        memo.onload=function(){try{var h=memo.contentDocument.body.scrollHeight;
+          if(h>320)memo.style.height=(h+40)+'px';}catch(e){}};
+        memo.srcdoc=html;
+        rstatus.textContent=name+' · '+y+'년 위험평가 메모';
+      }).catch(function(e){
+        rstatus.textContent='요청 실패: '+e+' — 잠시 후 다시 시도해 주세요.';
+      }).finally(function(){btn.disabled=false;});
+    }
+
+    document.getElementById('analyzeForm').addEventListener('submit',function(e){
+      e.preventDefault(); run();});
+  })();
+  </script>
 </body>
 </html>

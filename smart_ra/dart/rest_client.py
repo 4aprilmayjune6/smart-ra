@@ -21,6 +21,10 @@ from .schema import AuditRecord, CompanyRecord, DisclosureRecord, FinancialRecor
 
 _REPRT_ANNUAL = "11011"  # 사업보고서
 
+# corpCode.xml(약 1MB zip) 파싱 결과 프로세스 캐시 — (corp_name, stock_code, corp_code).
+# 서버리스 웜 인스턴스에서 재다운로드·재파싱을 피한다(SFR-C02: 실운영은 일 1회 갱신).
+_CORP_LIST_CACHE: list[tuple[str, str, str]] | None = None
+
 # 재무 계정명 → CompanyRecord 필드 매핑(표준계정 매핑, SFR-302)
 _ACCOUNT_MAP = {
     "매출액": "revenue",
@@ -67,19 +71,38 @@ class RestDartAdapter:
         return self._client.get(f"{self._base}/{endpoint}", params=params)
 
     # ── 회사 식별 ─────────────────────────────────────────────────────────────
-    def resolve_corp(self, query: str) -> CompanyIdentity | None:
-        # corpCode.xml (zip) 에서 매칭. 실제 운영은 일 1회 캐시 갱신(SFR-C02).
+    def _corp_list(self) -> list[tuple[str, str, str]]:
+        """corpCode.xml 을 (corp_name, stock_code, corp_code) 목록으로 파싱(프로세스 캐시)."""
+        global _CORP_LIST_CACHE
+        if _CORP_LIST_CACHE is not None:
+            return _CORP_LIST_CACHE
         resp = self._get("corpCode.xml")
         resp.raise_for_status()
         with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
             xml = zf.read(zf.namelist()[0])
         root = ET.fromstring(xml)
-        q = query.strip()
-        match = None
+        out: list[tuple[str, str, str]] = []
         for item in root.iter("list"):
             name = (item.findtext("corp_name") or "").strip()
             stock = (item.findtext("stock_code") or "").strip()
             code = (item.findtext("corp_code") or "").strip()
+            if name and code:
+                out.append((name, stock, code))
+        _CORP_LIST_CACHE = out
+        return out
+
+    def listed_companies(self) -> list[dict]:
+        """상장사(종목코드 보유) 목록 — 프론트 자동완성용. 공개정보."""
+        return [
+            {"name": name, "stock": stock, "corp": code}
+            for (name, stock, code) in self._corp_list()
+            if stock
+        ]
+
+    def resolve_corp(self, query: str) -> CompanyIdentity | None:
+        q = query.strip()
+        match = None
+        for (name, stock, code) in self._corp_list():
             if q == stock or q == name:
                 match = (code, name, stock or None)
                 break

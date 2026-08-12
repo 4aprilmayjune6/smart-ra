@@ -1,4 +1,5 @@
-# Vercel 정적 배포에는 web/ 만 필요 — 나머지는 업로드 제외(용량·오탐 방지)
+# Vercel 배포에 불필요한 것만 제외.
+# web/(정적)·api/(서버리스 함수)·smart_ra/(엔진, 함수가 임포트)·requirements.txt 는 포함해야 한다.
 .venv/
 venv/
 __pycache__/
@@ -8,7 +9,5 @@ __pycache__/
 output/
 tests/
 scripts/
-smart_ra/
-pyproject.toml
 codex_*.txt
 RFP_v1.0_audit-risk-platform.md
