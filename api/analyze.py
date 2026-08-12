@@ -124,6 +124,17 @@ def analyze(name: str, year: int, corp: str = "") -> tuple[int, str]:
             "다른 연도로 다시 시도해 보세요.",
         )
 
+    # 네이버 뉴스 자동 편입 — NAVER_CLIENT_ID/SECRET 있을 때만. 외부 비신뢰 신호로 태깅되며
+    # 판정 자동확정 없이 YELLOW 상한(SFR-606). 자격증명 없거나 실패 시 조용히 건너뛴다.
+    try:
+        from smart_ra.external.naver_news import fetch_news
+        search_name = (name or engagement.corp_name or "").replace("(주)", "").replace("주식회사", "").strip()
+        hits = fetch_news(search_name) if search_name else []
+        if hits:
+            svc.ingest_external(engagement.engagement_id, news=hits)
+    except Exception:  # noqa: BLE001 — 뉴스는 부가정보(메모 생성에 영향 없음)
+        pass
+
     record = CompanyRecord.model_validate(svc.repo.get_snapshot(engagement.snapshot_id or ""))
     signals = svc.repo.list_signals(engagement.engagement_id)
     assessment = svc.repo.get_assessment(engagement.engagement_id)

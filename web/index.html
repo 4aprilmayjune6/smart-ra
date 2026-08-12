@@ -25,7 +25,8 @@
   .kicker{font-size:.7rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
   h1{font-family:var(--serif);font-size:2.5rem;line-height:1.1;font-weight:600;margin:.35em 0 .15em;
     letter-spacing:-.01em}
-  .lead{color:var(--muted);font-size:1.05rem;max-width:60ch}
+  .lead{color:var(--muted);font-size:clamp(.72rem,2.05vw,1.05rem);line-height:1.55;max-width:100%;overflow-x:auto}
+  .lead .l{display:block;white-space:nowrap}
   .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
   .badge{font-family:var(--mono);font-size:.72rem;color:var(--muted);background:var(--accent-soft);
     border:1px solid var(--rule-strong);border-radius:999px;padding:4px 11px}
@@ -93,8 +94,7 @@
     <header>
       <div class="kicker">DART · 감사 위험평가 자동화 (참조구현)</div>
       <h1>SMART-RA 산출물</h1>
-      <p class="lead">한국 회계법인 감사계획용 위험평가 자동화 플랫폼의 참조구현 산출물입니다.<br>
-      판정은 서버측 <strong>결정론 룰·산식</strong>으로, 서술은 근거 인용 기반으로 생성됩니다.</p>
+      <p class="lead"><span class="l">한국 회계법인 감사계획용 위험평가 자동화 플랫폼의 참조구현 산출물입니다.</span><span class="l">판정은 서버측 <strong>결정론 룰·산식</strong>으로, 서술은 근거 인용 기반으로 생성됩니다.</span></p>
       <div class="badges">
         <span class="badge">KSA 315·240·570</span>
         <span class="badge">K-IFRS 1115·1036·1002</span>
