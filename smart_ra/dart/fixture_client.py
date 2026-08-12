@@ -37,7 +37,8 @@ class FixtureDartAdapter:
                 return CompanyIdentity(rec.corp_code, rec.corp_name, rec.stock_code, rec.ksic_code)
         return None
 
-    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5) -> CompanyRecord:
+    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5,
+                      include_fees: bool = True) -> CompanyRecord:
         rec = _load_all().get(corp_code)
         if rec is None:
             raise KeyError(f"fixture 회사 없음: {corp_code}")

@@ -1,7 +1,7 @@
 # Vercel Python 서버리스 함수(api/*.py) 런타임 의존성.
 # MCP 서버(mcp)는 웹 경로에서 불필요하므로 제외 — 번들 경량화.
+# HTTP 는 표준 라이브러리(urllib) 사용 — httpx 는 Vercel 런타임에서 요청이 멈춰 제거.
 pydantic>=2
 pydantic-settings>=2
 pyyaml>=6
 jinja2>=3
-httpx>=0.27

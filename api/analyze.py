@@ -90,21 +90,28 @@ def _error_page(title: str, detail: str, hint: str = "") -> str:
 </div></body></html>"""
 
 
-def analyze(name: str, year: int) -> tuple[int, str]:
-    """분석 실행 → (status, html). 실패는 사용자용 에러 페이지로 반환."""
+def analyze(name: str, year: int, corp: str = "") -> tuple[int, str]:
+    """분석 실행 → (status, html). 실패는 사용자용 에러 페이지로 반환.
+
+    corp(8자리 corp_code)가 주어지면 회사식별을 건너뛰고 바로 분석한다(권장, 빠름).
+    없으면 name 으로 resolve 하는데, 이때 대용량 corpCode.xml 다운로드가 필요해 느리다.
+    """
     from smart_ra.dart.schema import CompanyRecord
     from smart_ra.memo.html_generator import generate_memo_html
     from smart_ra.service import EngagementNotFound, SmartRaService
 
     svc = SmartRaService()
     try:
-        engagement, job = svc.register_engagement(name, year)
+        if corp:
+            engagement, job = svc.register_by_corp_code(
+                corp, year, corp_name=name or None, years=3)
+        else:
+            engagement, job = svc.register_engagement(name, year)
     except EngagementNotFound:
         return 404, _error_page(
             "회사를 찾지 못했습니다",
-            f"'{name}' (FY{year})",
-            "정확한 법인명 또는 종목코드로 입력해 보세요. 예: 삼성전자, 005930. "
-            "인증키 미설정(샘플) 모드에서는 한빛건설·대양제조·제노바이오만 조회됩니다.",
+            f"'{name or corp}' (FY{year})",
+            "검색창의 자동완성 목록에서 회사를 선택해 주세요.",
         )
 
     from smart_ra.models import JobStatus
@@ -134,10 +141,11 @@ class handler(BaseHTTPRequestHandler):
             query = urlparse(self.path).query
             name = (_decode_param(query, "q") or _decode_param(query, "name")).strip()[:80]
             year_raw = _decode_param(query, "year").strip()
+            corp = "".join(ch for ch in _decode_param(query, "corp") if ch.isdigit())[:8]
 
-            if not name:
+            if not name and not corp:
                 return self._send(400, _error_page(
-                    "회사명이 필요합니다", "q(회사명 또는 종목코드) 파라미터가 비어 있습니다."))
+                    "회사가 필요합니다", "q(회사명) 또는 corp(corp_code) 파라미터가 비어 있습니다."))
             try:
                 year = int(year_raw)
             except ValueError:
@@ -149,7 +157,7 @@ class handler(BaseHTTPRequestHandler):
                     f"year={year}",
                     f"{_YEAR_MIN}~{_YEAR_MAX} 사이의 사업연도를 선택하세요."))
 
-            status, html = analyze(name, year)
+            status, html = analyze(name, year, corp=corp)
             return self._send(status, html)
         except Exception:  # noqa: BLE001 — 예기치 못한 오류도 페이지로 표면화
             return self._send(500, _error_page(

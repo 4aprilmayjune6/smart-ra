@@ -199,48 +199,67 @@
     YEARS.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y+'년';
       if(y===DEFAULT)o.selected=true;sel.appendChild(o);});
 
-    var q=document.getElementById('q');
-    var btn=document.getElementById('goBtn');
-    var result=document.getElementById('result');
-    var memo=document.getElementById('memo');
-    var rstatus=document.getElementById('rstatus');
-    var newtab=document.getElementById('newtab');
+    var q=document.getElementById('q'), btn=document.getElementById('goBtn'),
+        result=document.getElementById('result'), memo=document.getElementById('memo'),
+        rstatus=document.getElementById('rstatus'), newtab=document.getElementById('newtab'),
+        hint=document.getElementById('hint');
+    var byName={}, byStock={}, loaded=false;
 
-    // 빠른 예시 칩
-    var samples=[['삼성전자',2024],['아모레퍼시픽',2025],['SK하이닉스',2024],['현대자동차',2024],['NAVER',2024]];
-    var chips=document.getElementById('chips');
-    samples.forEach(function(s){var c=document.createElement('span');c.className='chip';
-      c.textContent=s[0]+' '+s[1];
-      c.onclick=function(){q.value=s[0];sel.value=String(s[1]);run();};chips.appendChild(c);});
-
-    // 자동완성(상장사 목록) — 실패해도 자유입력 가능
-    fetch('/api/companies').then(function(r){return r.json();}).then(function(d){
-      var dl=document.getElementById('companyList');
-      var list=(d.companies||[]).slice(0,4000);
+    // 정적 상장사 목록 로드(회사명·종목코드→corp_code). corpCode.xml 은 서버리스에서
+    // 대역폭 제약으로 못 받으므로, 목록은 정적 파일로 두고 분석은 corp_code 로 직접 호출한다.
+    fetch('/companies.json').then(function(r){return r.json();}).then(function(d){
+      var list=d.companies||[]; var dl=document.getElementById('companyList');
       var frag=document.createDocumentFragment();
-      list.forEach(function(c){var o=document.createElement('option');o.value=c.name;
-        if(c.stock)o.label=c.stock;frag.appendChild(o);});
-      dl.appendChild(frag);
-    }).catch(function(){});
+      list.forEach(function(c){
+        byName[c.name]=c.corp; if(c.stock) byStock[c.stock]=c.corp;
+        var o=document.createElement('option'); o.value=c.name; if(c.stock)o.label=c.stock;
+        frag.appendChild(o);
+      });
+      dl.appendChild(frag); loaded=true;
+      hint.textContent='상장사 '+list.length.toLocaleString()+'곳 검색 가능 · 실시간 DART 수집이라 5~15초 걸립니다. 자동완성에서 선택하세요.';
+    }).catch(function(){ hint.textContent='회사목록을 불러오지 못했습니다. 잠시 후 새로고침 해주세요.'; });
+
+    function resolveCorp(val){
+      if(byName[val]) return {corp:byName[val], name:val};
+      if(/^\d{6}$/.test(val) && byStock[val]) return {corp:byStock[val], name:val};
+      if(/^\d{8}$/.test(val)) return {corp:val, name:''};
+      var keys=Object.keys(byName);
+      for(var i=0;i<keys.length;i++){ if(keys[i].indexOf(val)===0) return {corp:byName[keys[i]], name:keys[i]}; }
+      return null;
+    }
 
     function run(){
-      var name=q.value.trim(); var y=sel.value;
-      if(!name){q.focus();return;}
-      var url='/api/analyze?q='+encodeURIComponent(name)+'&year='+encodeURIComponent(y);
-      btn.disabled=true; result.classList.add('show');
-      newtab.href=url;
-      rstatus.innerHTML='<span class="spinner"></span>'+name+' · '+y+'년 분석 중… (실시간 DART 수집, 최대 20초)';
+      var val=q.value.trim(); var y=sel.value;
+      if(!val){q.focus();return;}
+      result.classList.add('show');
+      var r=resolveCorp(val);
+      if(!r){
+        rstatus.textContent='“'+val+'” 를 목록에서 찾지 못했습니다. 자동완성에서 회사를 선택해 주세요.';
+        memo.removeAttribute('srcdoc'); memo.style.height='0';
+        return;
+      }
+      var url='/api/analyze?corp='+encodeURIComponent(r.corp)
+              +'&q='+encodeURIComponent(r.name||val)+'&year='+encodeURIComponent(y);
+      btn.disabled=true; newtab.href=url;
+      rstatus.innerHTML='<span class="spinner"></span>'+(r.name||val)+' · '+y+'년 분석 중… (실시간 DART 수집)';
       memo.style.height='540px';
       result.scrollIntoView({behavior:'smooth',block:'start'});
-      fetch(url).then(function(r){return r.text();}).then(function(html){
+      fetch(url).then(function(res){return res.text();}).then(function(html){
         memo.onload=function(){try{var h=memo.contentDocument.body.scrollHeight;
           if(h>320)memo.style.height=(h+40)+'px';}catch(e){}};
         memo.srcdoc=html;
-        rstatus.textContent=name+' · '+y+'년 위험평가 메모';
+        rstatus.textContent=(r.name||val)+' · '+y+'년 위험평가 메모';
       }).catch(function(e){
         rstatus.textContent='요청 실패: '+e+' — 잠시 후 다시 시도해 주세요.';
       }).finally(function(){btn.disabled=false;});
     }
+
+    // 빠른 예시 칩(목록에 있으면 동작)
+    var samples=[['삼성전자',2024],['SK하이닉스',2024],['아모레퍼시픽',2024],['현대자동차',2024],['NAVER',2024]];
+    var chips=document.getElementById('chips');
+    samples.forEach(function(s){var c=document.createElement('span');c.className='chip';
+      c.textContent=s[0]+' '+s[1];
+      c.onclick=function(){q.value=s[0];sel.value=String(s[1]);run();};chips.appendChild(c);});
 
     document.getElementById('analyzeForm').addEventListener('submit',function(e){
       e.preventDefault(); run();});

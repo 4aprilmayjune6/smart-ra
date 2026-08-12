@@ -10,10 +10,14 @@
 from __future__ import annotations
 
 import io
+import json
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
 import zipfile
-from xml.etree import ElementTree as ET
-
-import httpx
+from concurrent.futures import ThreadPoolExecutor
+from html import unescape
 
 from ..config import settings
 from .adapter import CompanyIdentity
@@ -64,28 +68,48 @@ class RestDartAdapter:
             raise RuntimeError("SMARTRA_DART_API_KEY 미설정 — rest 어댑터 사용 불가")
         self._key = settings.dart_api_key
         self._base = settings.dart_base_url
-        self._client = httpx.Client(timeout=30.0)
+        self._timeout = 30.0
 
-    def _get(self, endpoint: str, **params) -> httpx.Response:
+    # HTTP 계층은 표준 라이브러리(urllib)를 쓴다. httpx 는 일부 서버리스 런타임(Vercel)에서
+    # 요청이 멈추는 문제가 있어 의존성 없이 안정적인 urllib 로 대체한다.
+    def _fetch(self, endpoint: str, params: dict) -> bytes:
+        params = dict(params)
         params["crtfc_key"] = self._key
-        return self._client.get(f"{self._base}/{endpoint}", params=params)
+        url = f"{self._base}/{endpoint}?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={"User-Agent": "smart-ra/0.1"})
+        with urllib.request.urlopen(req, timeout=self._timeout) as resp:
+            return resp.read()
+
+    def _get_json(self, endpoint: str, **params) -> dict:
+        try:
+            return json.loads(self._fetch(endpoint, params).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return {"status": "999", "message": "invalid response"}
 
     # ── 회사 식별 ─────────────────────────────────────────────────────────────
     def _corp_list(self) -> list[tuple[str, str, str]]:
-        """corpCode.xml 을 (corp_name, stock_code, corp_code) 목록으로 파싱(프로세스 캐시)."""
+        """corpCode.xml 을 (corp_name, stock_code, corp_code) 목록으로 파싱(프로세스 캐시).
+
+        약 10만 건이라 ElementTree 는 제약된 서버리스 CPU에서 수십 초가 걸린다.
+        레코드 순서(corp_code→corp_name→…→stock_code)가 안정적이므로 정규식으로 일괄 추출한다.
+        """
         global _CORP_LIST_CACHE
         if _CORP_LIST_CACHE is not None:
             return _CORP_LIST_CACHE
-        resp = self._get("corpCode.xml")
-        resp.raise_for_status()
-        with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
-            xml = zf.read(zf.namelist()[0])
-        root = ET.fromstring(xml)
+        content = self._fetch("corpCode.xml", {})
+        with zipfile.ZipFile(io.BytesIO(content)) as zf:
+            text = zf.read(zf.namelist()[0]).decode("utf-8", "replace")
+        pattern = re.compile(
+            r"<corp_code>\s*(.*?)\s*</corp_code>.*?"
+            r"<corp_name>\s*(.*?)\s*</corp_name>.*?"
+            r"<stock_code>\s*(.*?)\s*</stock_code>",
+            re.S,
+        )
         out: list[tuple[str, str, str]] = []
-        for item in root.iter("list"):
-            name = (item.findtext("corp_name") or "").strip()
-            stock = (item.findtext("stock_code") or "").strip()
-            code = (item.findtext("corp_code") or "").strip()
+        for code, name, stock in pattern.findall(text):
+            name = unescape(name).strip()
+            code = code.strip()
+            stock = stock.strip()
             if name and code:
                 out.append((name, stock, code))
         _CORP_LIST_CACHE = out
@@ -114,33 +138,45 @@ class RestDartAdapter:
         return CompanyIdentity(match[0], match[1], match[2], ksic)
 
     def _company_ksic(self, corp_code: str) -> str | None:
-        resp = self._get("company.json", corp_code=corp_code)
-        data = resp.json()
+        data = self._get_json("company.json", corp_code=corp_code)
         if data.get("status") != "000":
             return None
         return data.get("induty_code")
 
     # ── 회사 데이터 수집 ────────────────────────────────────────────────────────
-    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5) -> CompanyRecord:
-        identity = None
-        ksic = self._company_ksic(corp_code)
-        name_resp = self._get("company.json", corp_code=corp_code).json()
-        corp_name = name_resp.get("corp_name", corp_code)
-        stock_code = (name_resp.get("stock_code") or "").strip() or None
+    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5,
+                      include_fees: bool = True) -> CompanyRecord:
+        # include_fees=False 면 감사보수 조회(연 2회 호출)를 생략한다 — 서버리스 응답시간 단축용.
+        # 독립적인 DART 호출(공시목록·연도별 재무·감사)을 스레드풀로 병렬 수집한다. urllib 는
+        # 소켓 I/O 중 GIL 을 해제하므로 총 소요가 합계 대신 최대치에 수렴한다(서버리스 60초 제약 대응).
+        info = self._get_json("company.json", corp_code=corp_code)  # 회사개황 1회로 명칭·업종·종목
+        ok = info.get("status") == "000"
+        corp_name = (info.get("corp_name") if ok else None) or corp_code
+        stock_code = (info.get("stock_code") or "").strip() or None
+        ksic = info.get("induty_code") if ok else None
 
         rec = CompanyRecord(
             corp_code=corp_code, corp_name=corp_name, stock_code=stock_code, ksic_code=ksic
         )
         year_range = list(range(fiscal_year - years + 1, fiscal_year + 1))
 
-        rec.disclosures = self._fetch_disclosures(corp_code, year_range[0], fiscal_year)
-        for y in year_range:
-            fin = self._fetch_financials(corp_code, y)
-            if fin:
-                rec.financials.append(fin)
-            aud = self._fetch_audit(corp_code, y)
-            if aud:
-                rec.audits.append(aud)
+        with ThreadPoolExecutor(max_workers=8) as ex:
+            disc_futs = [
+                ex.submit(self._fetch_disclosure_type, corp_code, year_range[0], fiscal_year, ty)
+                for ty in ("A", "B", "E", "F", "I")
+            ]
+            fin_futs = {y: ex.submit(self._fetch_financials, corp_code, y) for y in year_range}
+            aud_futs = {y: ex.submit(self._fetch_audit, corp_code, y, include_fees)
+                        for y in year_range}
+            for f in disc_futs:
+                rec.disclosures.extend(f.result())
+            for y in year_range:
+                fin = fin_futs[y].result()
+                if fin:
+                    rec.financials.append(fin)
+                aud = aud_futs[y].result()
+                if aud:
+                    rec.audits.append(aud)
 
         # 감사인 변경 이력·KAM 등 비정형 파싱은 별도 파서 필요 → 미구현분 기록
         rec.parse_issues.append(
@@ -149,34 +185,33 @@ class RestDartAdapter:
         )
         return rec
 
-    def _fetch_disclosures(self, corp_code: str, y0: int, y1: int) -> list[DisclosureRecord]:
+    def _fetch_disclosure_type(self, corp_code: str, y0: int, y1: int, ty: str) -> list[DisclosureRecord]:
         # list.json 응답에는 pblntf_ty 필드가 없다 → 유형별 요청 파라미터로 분리 수집·태깅.
         out: list[DisclosureRecord] = []
-        for ty in ("A", "B", "E", "F", "I"):
-            resp = self._get(
-                "list.json", corp_code=corp_code, bgn_de=f"{y0}0101", end_de=f"{y1}1231",
-                pblntf_ty=ty, page_count=100,
-            ).json()
-            if resp.get("status") != "000":
-                continue
-            for it in resp.get("list", []):
-                nm = it.get("report_nm", "")
-                out.append(DisclosureRecord(
-                    rcept_no=it["rcept_no"], report_nm=nm, pblntf_ty=ty,
-                    rcept_dt=it.get("rcept_dt", ""),
-                    corrected="[기재정정]" in nm or "[첨부정정]" in nm,
-                    body="",  # 원문 본문은 document.xml 별도 수집(대용량 → 필요 시)
-                ))
+        resp = self._get_json(
+            "list.json", corp_code=corp_code, bgn_de=f"{y0}0101", end_de=f"{y1}1231",
+            pblntf_ty=ty, page_count=100,
+        )
+        if resp.get("status") != "000":
+            return out
+        for it in resp.get("list", []):
+            nm = it.get("report_nm", "")
+            out.append(DisclosureRecord(
+                rcept_no=it["rcept_no"], report_nm=nm, pblntf_ty=ty,
+                rcept_dt=it.get("rcept_dt", ""),
+                corrected="[기재정정]" in nm or "[첨부정정]" in nm,
+                body="",  # 원문 본문은 document.xml 별도 수집(대용량 → 필요 시)
+            ))
         return out
 
     def _fetch_financials(self, corp_code: str, year: int) -> FinancialRecord | None:
-        resp = self._get(
+        resp = self._get_json(
             "fnlttSinglAcntAll.json",
             corp_code=corp_code,
             bsns_year=str(year),
             reprt_code=_REPRT_ANNUAL,
             fs_div="CFS",
-        ).json()
+        )
         if resp.get("status") != "000":
             return None
         fin = FinancialRecord(year=year, basis="CFS")
@@ -186,13 +221,13 @@ class RestDartAdapter:
                 setattr(fin, field, _num(row.get("thstrm_amount")))
         return fin
 
-    def _fetch_audit(self, corp_code: str, year: int) -> AuditRecord | None:
-        resp = self._get(
+    def _fetch_audit(self, corp_code: str, year: int, include_fees: bool = True) -> AuditRecord | None:
+        resp = self._get_json(
             "accnutAdtorNmNdAdtOpinion.json",
             corp_code=corp_code,
             bsns_year=str(year),
             reprt_code=_REPRT_ANNUAL,
-        ).json()
+        )
         if resp.get("status") != "000" or not resp.get("list"):
             return None
         row = resp["list"][0]
@@ -203,7 +238,8 @@ class RestDartAdapter:
             auditor=row.get("adtor", ""),
             opinion=opinion,
         )
-        self._augment_fees(aud, corp_code, year)
+        if include_fees:
+            self._augment_fees(aud, corp_code, year)
         return aud
 
     @staticmethod
@@ -219,21 +255,21 @@ class RestDartAdapter:
 
     def _augment_fees(self, aud: AuditRecord, corp_code: str, year: int) -> None:
         try:
-            adt = self._get(
+            adt = self._get_json(
                 "adtServcCnclsSttus.json",
                 corp_code=corp_code, bsns_year=str(year), reprt_code=_REPRT_ANNUAL,
-            ).json()
+            )
             if adt.get("status") == "000" and adt.get("list"):
                 row = adt["list"][-1]  # 당기 계약
                 aud.audit_fee = (self._fee_num(row.get("adt_cntrct_dtls_mendng"))
                                  or self._fee_num(row.get("real_exc_dtls_mendng"))
                                  or self._fee_num(row.get("mendng")))
-            non = self._get(
+            non = self._get_json(
                 "acntAdtorNonAdtServcCnclsSttus.json",
                 corp_code=corp_code, bsns_year=str(year), reprt_code=_REPRT_ANNUAL,
-            ).json()
+            )
             if non.get("status") == "000" and non.get("list"):
                 total = sum(self._fee_num(r.get("cntrct_amount")) or 0 for r in non["list"])
                 aud.non_audit_fee = total or None
-        except (httpx.HTTPError, KeyError, ValueError):
+        except (urllib.error.URLError, OSError, KeyError, ValueError):
             pass

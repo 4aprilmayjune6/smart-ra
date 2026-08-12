@@ -1,0 +1,1 @@
+{"count":1,"companies":[{"name":"삼성전자","stock":"005930","corp":"00126380"}],"_note":"시드(삼성전자만). 전체 상장사 목록은 scripts/gen_companies.py 로 로컬에서 생성해 교체."}

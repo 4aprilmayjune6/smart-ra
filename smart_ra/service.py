@@ -72,18 +72,38 @@ class SmartRaService:
         job = self._collect_and_analyze(engagement)
         return self.repo.get_engagement(engagement_id), job
 
+    def register_by_corp_code(
+        self, corp_code: str, fiscal_year: int, corp_name: str | None = None,
+        stock_code: str | None = None, team: str | None = None, years: int = 5,
+    ) -> tuple[Engagement, Job]:
+        """corp_code 를 이미 아는 경우 회사식별(corpCode.xml 다운로드)을 건너뛰고 바로 수집·분석.
+
+        웹 검색은 정적 목록에서 corp_code 를 선택해 넘기므로 대용량 corpCode.xml 을 런타임에
+        받지 않는다(서버리스 대역폭 제약 회피). 회사명·업종은 수집 후 실제 값으로 보정된다.
+        """
+        engagement_id = content_id("ENG", corp_code, str(fiscal_year))
+        engagement = Engagement(
+            engagement_id=engagement_id, corp_code=corp_code,
+            corp_name=corp_name or corp_code, stock_code=stock_code,
+            ksic_code=None, fiscal_year=fiscal_year, team=team,
+        )
+        self.repo.save_engagement(engagement)
+        job = self._collect_and_analyze(engagement, years=years, include_fees=False)
+        return self.repo.get_engagement(engagement_id), job
+
     def refresh(self, engagement_id: str) -> Job:
         return self._collect_and_analyze(self._require(engagement_id), job_type=JobType.REANALYZE)
 
     # ── 수집 + 분석(모듈 1·2·3) ────────────────────────────────────────────────
-    def _collect_and_analyze(self, engagement: Engagement, job_type: JobType = JobType.COLLECT) -> Job:
+    def _collect_and_analyze(self, engagement: Engagement, job_type: JobType = JobType.COLLECT,
+                             years: int = 5, include_fees: bool = True) -> Job:
         job_id = content_id("JOB", engagement.engagement_id, job_type.value)
         job = Job(job_id=job_id, engagement_id=engagement.engagement_id, type=job_type,
                   status=JobStatus.RUNNING, progress=0.1)
         self.repo.save_job(job)
         try:
             record: CompanyRecord = self.adapter.fetch_company(
-                engagement.corp_code, engagement.fiscal_year)
+                engagement.corp_code, engagement.fiscal_year, years=years, include_fees=include_fees)
         except Exception as exc:  # noqa: BLE001 — 수집 실패는 job 상태로 표면화
             job.status = JobStatus.FAILED
             job.message = f"수집 실패: {exc}"
@@ -92,6 +112,13 @@ class SmartRaService:
 
         snapshot_id = content_id("SNAP", record.model_dump_json())
         self.repo.save_snapshot(snapshot_id, record.model_dump())
+        # 수집된 실제 회사정보로 인게이지먼트 식별정보 보정(corp_code 직접 등록 경로 대비)
+        if record.corp_name:
+            engagement.corp_name = record.corp_name
+        if record.ksic_code:
+            engagement.ksic_code = record.ksic_code
+        if record.stock_code:
+            engagement.stock_code = record.stock_code
         engagement.snapshot_id = snapshot_id
         self.repo.save_engagement(engagement)
 

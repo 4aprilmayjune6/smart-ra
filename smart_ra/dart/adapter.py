@@ -24,8 +24,12 @@ class DartAdapter(Protocol):
         """법인명 또는 종목코드로 회사를 식별한다(corpCode.xml / company.json)."""
         ...
 
-    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5) -> CompanyRecord:
-        """공시목록·원문·재무·감사정보를 수집해 정규화한다."""
+    def fetch_company(self, corp_code: str, fiscal_year: int, years: int = 5,
+                      include_fees: bool = True) -> CompanyRecord:
+        """공시목록·원문·재무·감사정보를 수집해 정규화한다.
+
+        include_fees=False 면 감사보수 조회를 생략한다(수집 호출 수·응답시간 절감).
+        """
         ...
 
 
