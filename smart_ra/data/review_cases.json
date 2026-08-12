@@ -1,0 +1,70 @@
+{
+  "_source": "금융감독원 회계감리 지적사례(ifrs MCP search_audit_case 조회). 산업(industry_id)별 대표 선례를 정적 번들로 매칭한다. 실제 사용 전 회계사(SME) 검수 대상.",
+  "cases": [
+    {
+      "case_id": "FSS/2008-09",
+      "year": "2016",
+      "standards": ["K-IFRS 1115"],
+      "account": "공사수익(진행기준)",
+      "title": "공사수익 과대계상 — 현장 간 원가 대체로 진행률 조작",
+      "issue": "수익이 발생하지 않는 공사현장의 원가를 수익이 발생하는 현장으로 대체하는 방식으로 공사진행률을 조작하여 공사수익을 과대계상.",
+      "url": "https://www.fss.or.kr/fss/cmmn/file/fileDown.do?menuNo=200448&atchFileId=ce9760c2a650bbc0368c160c42666493&fileSn=1&bbsId=",
+      "industries": ["CONST"]
+    },
+    {
+      "case_id": "FSS-51373",
+      "year": "2017",
+      "standards": ["K-IFRS 1115", "KSA 540"],
+      "account": "공사수익·공사미수금",
+      "title": "해외 프로젝트 진행률 산정 오류 및 공사미수금 대손충당금 과소",
+      "issue": "추가 발생원가를 총계약원가에 적절히 반영하지 못해 계약수익을 과대계상하고, 시행사의 채무상환능력을 과대평가하여 공사미수금 대손충당금을 과소계상.",
+      "industries": ["CONST"]
+    },
+    {
+      "case_id": "FSS-51367",
+      "year": "2013",
+      "standards": ["K-IFRS 1002", "KSA 501"],
+      "account": "재고자산",
+      "title": "재고실사 조작을 통한 재고자산 과대계상",
+      "issue": "품목이 다양하고 수량 확인이 어려운 점을 이용해 재고실사 시 수량이 조작된 목록을 제시하고, 실사 이후 재고목록 수량을 조정하여 재무제표에 반영하는 방식으로 재고자산을 과대계상.",
+      "industries": ["MFG", "COSMETIC", "RETAIL"]
+    },
+    {
+      "case_id": "FSS-51363",
+      "year": "2009",
+      "standards": ["K-IFRS 1115", "KSA 240"],
+      "account": "매출·매출원가",
+      "title": "3자간 허위 순환거래를 통한 매출 과대계상",
+      "issue": "3자간 허위매출 순환거래에 개입하여 매출과 매출원가를 과대계상. 상장 유지 요건 충족을 위해 비정상적 거래를 정상 거래로 위장한 사례.",
+      "industries": ["RETAIL", "MFG", "COSMETIC"]
+    },
+    {
+      "case_id": "FSS-51372",
+      "year": "2016",
+      "standards": ["K-IFRS 1115"],
+      "account": "용역매출(기간귀속)",
+      "title": "온라인 동영상 매출 기간귀속 오류",
+      "issue": "기간 경과에 따라 인식해야 할 온라인 동영상 강의 매출을 결제 시점에 전액 인식하여 매출과 매출원가를 과대계상.",
+      "industries": ["ITPLAT"]
+    },
+    {
+      "case_id": "FSS/1912-13",
+      "year": "2018",
+      "standards": ["K-IFRS 1038"],
+      "account": "개발비(무형자산)",
+      "title": "기술적 실현가능성 미충족 개발비 자산화",
+      "issue": "신약·체외진단 의료기기의 전임상·초기 단계에서 발생한 경상연구개발비를 무형자산 인식요건(기술적 실현가능성) 미충족에도 자산화하여 자기자본과 손익을 과대계상.",
+      "url": "https://www.fss.or.kr/fss/cmmn/file/fileDown.do?menuNo=200448&atchFileId=a8d139e623d0be4017d21eebe8601ca6&fileSn=1&bbsId=",
+      "industries": ["BIO", "ITPLAT"]
+    },
+    {
+      "case_id": "FSS-51367",
+      "year": "2013",
+      "standards": ["K-IFRS 1115", "KSA 500"],
+      "account": "연구용역매출",
+      "title": "계약이행조건 미충족 연구매출 조기인식",
+      "issue": "관계기관의 인·허가 또는 거래처 동의가 이루어지지 않아 계약이행이 사실상 불가능해 수익인식요건을 충족하지 못함에도 연구매출을 인식하여 매출액을 과대계상.",
+      "industries": ["BIO"]
+    }
+  ]
+}

@@ -357,8 +357,8 @@
     <div class="sec-h"><span class="n">7</span><h2>외부 공개정보 · 감리 선례</h2><span class="ksa">모듈 1·2 · 외부(비신뢰)</span></div>
     {% set news = signals|selectattr('category','equalto','EXTERNAL_NEWS')|list %}
     {% set reviews = signals|selectattr('category','equalto','REVIEW_PRECEDENT')|list %}
-    <p class="lead">DART 정형 데이터 밖의 외부 공개정보다. <strong>기사</strong>는 에이전트가 WebSearch로, <strong>감리지적 선례</strong>는
-    금감원 감리사례에서 수집한 것으로, 모두 <strong>외부 유래(비신뢰)</strong>라 판정을 자동 확정하지 않는다 — 감사인이 수동으로 확인한다.</p>
+    <p class="lead">DART 정형 데이터 밖의 외부 공개정보다. <strong>기사</strong>는 Google 뉴스, <strong>감리지적 선례</strong>는
+    업종별 금감원 감리사례에서 수집한 것으로, <strong>외부 유래</strong>라 판정을 자동 확정하지 않는다 — 감사인이 수동으로 확인한다(YELLOW 상한).</p>
     <p class="lead" style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)">외부 기사 {{ news|length }}건</p>
     <ul class="sig">
       {% for s in news %}

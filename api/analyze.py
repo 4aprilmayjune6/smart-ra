@@ -124,18 +124,30 @@ def analyze(name: str, year: int, corp: str = "") -> tuple[int, str]:
             "다른 연도로 다시 시도해 보세요.",
         )
 
-    # 네이버 뉴스 자동 편입 — NAVER_CLIENT_ID/SECRET 있을 때만. 외부 비신뢰 신호로 태깅되며
-    # 판정 자동확정 없이 YELLOW 상한(SFR-606). 자격증명 없거나 실패 시 조용히 건너뛴다.
+    record = CompanyRecord.model_validate(svc.repo.get_snapshot(engagement.snapshot_id or ""))
+
+    # 외부 공개정보 편입: ①Google 뉴스(기사, untrusted) ②산업 매칭 감리지적 선례(trusted).
+    # 외부 정보는 판정 자동확정 없이 YELLOW 상한(SFR-606). 각 단계는 독립적으로 실패해도
+    # 메모 생성에는 영향이 없다.
+    hits: list[dict] = []
+    cases: list[dict] = []
     try:
-        from smart_ra.external.naver_news import fetch_news
+        from smart_ra.external.news import fetch_news
         search_name = (name or engagement.corp_name or "").replace("(주)", "").replace("주식회사", "").strip()
         hits = fetch_news(search_name) if search_name else []
-        if hits:
-            svc.ingest_external(engagement.engagement_id, news=hits)
-    except Exception:  # noqa: BLE001 — 뉴스는 부가정보(메모 생성에 영향 없음)
-        pass
+    except Exception:  # noqa: BLE001
+        hits = []
+    try:
+        from smart_ra.external.review_cases import match_review_cases
+        cases = match_review_cases(record)
+    except Exception:  # noqa: BLE001
+        cases = []
+    if hits or cases:
+        try:
+            svc.ingest_external(engagement.engagement_id, news=hits, review_cases=cases)
+        except Exception:  # noqa: BLE001
+            pass
 
-    record = CompanyRecord.model_validate(svc.repo.get_snapshot(engagement.snapshot_id or ""))
     signals = svc.repo.list_signals(engagement.engagement_id)
     assessment = svc.repo.get_assessment(engagement.engagement_id)
     cross = svc.run_cross_validation(engagement.engagement_id)
