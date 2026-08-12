@@ -93,7 +93,7 @@
     <header>
       <div class="kicker">DART · 감사 위험평가 자동화 (참조구현)</div>
       <h1>SMART-RA 산출물</h1>
-      <p class="lead">한국 회계법인 감사계획용 위험평가 자동화 플랫폼의 참조구현 산출물입니다.
+      <p class="lead">한국 회계법인 감사계획용 위험평가 자동화 플랫폼의 참조구현 산출물입니다.<br>
       판정은 서버측 <strong>결정론 룰·산식</strong>으로, 서술은 근거 인용 기반으로 생성됩니다.</p>
       <div class="badges">
         <span class="badge">KSA 315·240·570</span>
@@ -133,57 +133,6 @@
       </div>
     </section>
 
-    <section>
-      <div class="sec-h"><h2>실데이터 메모 (예시)</h2><span>미리 생성한 산출물 — 위 검색으로 직접 만들 수도 있습니다 · 외부 공개정보(기사·감리선례) 편입</span></div>
-      <div class="grid"><a class="card featured" href="memo-amore-2025.html">
-        <div class="ctag">실데이터 + 외부신호</div>
-        <h3>아모레퍼시픽 · FY2025</h3>
-        <p>OpenDART 실데이터(사업보고서 2026-03) 기반 위험평가 메모. 핵심위험 3건·외부 공개정보 7건. PDF 제공.</p>
-        <div class="cfoot"><span class="open">열기 →</span><a class="pdf" href="memo-amore-2025.pdf" download>PDF ↓</a></div>
-      </a><a class="card" href="memo-samsung.html">
-        <div class="ctag">실데이터 + 외부신호</div>
-        <h3>삼성전자 · FY2024</h3>
-        <p>대형 제조업 실데이터 메모. 공시·산업·재무 신호 교차검증 + 감리 선례 편입.</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a></div>
-    </section>
-<section>
-      <div class="sec-h"><h2>샘플 메모</h2><span>인증키 없이 재현되는 fixture 3사</span></div>
-      <div class="grid"><a class="card" href="memo-daeyang.html">
-        <div class="ctag">건전 제조</div>
-        <h3>대양제조 · 샘플</h3>
-        <p>fixture 샘플 — 계속기업 GREEN(재무 양호) 사례.</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a><a class="card" href="memo-hanbit.html">
-        <div class="ctag">부실 · 하드룰 RED</div>
-        <h3>한빛건설 · 샘플</h3>
-        <p>fixture 샘플 — 계속기업 하드룰 발동으로 즉시 적색 판정.</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a><a class="card" href="memo-geno.html">
-        <div class="ctag">수익 전 바이오 · YELLOW</div>
-        <h3>제노바이오 · 샘플</h3>
-        <p>fixture 샘플 — 현금 runway 기반 계속기업 불확실성(YELLOW).</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a></div>
-    </section>
-<section>
-      <div class="sec-h"><h2>대시보드</h2><span>다회사 위험 비교</span></div>
-      <div class="grid"><a class="card" href="dashboard.html">
-        <div class="ctag">다회사 비교</div>
-        <h3>위험평가 대시보드</h3>
-        <p>회사별 신호등·계속기업 점수·핵심위험을 한눈에 비교하는 대시보드.</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a></div>
-    </section>
-<section>
-      <div class="sec-h"><h2>제안요청서</h2><span>요구사항 명세 전문</span></div>
-      <div class="grid"><a class="card" href="rfp.html">
-        <div class="ctag">v1.3</div>
-        <h3>제안요청서(RFP) 전문</h3>
-        <p>SMART-RA 제안요청서 전문. IR-07 외부정보 소스 등 신규 요구사항 상단 요약.</p>
-        <div class="cfoot"><span class="open">열기 →</span></div>
-      </a></div>
-    </section>
     <footer>
       본 산출물은 시스템이 자동 생성한 <strong>초안(draft)</strong>이며 감사인의 전문가적 판단을 대체하지 않습니다.
       최종 위험평가·유의적 위험 결정·감사절차 결정은 업무수행이사와 감사팀이 수행합니다(감사기준서 500·SFR-405).<br>
@@ -194,7 +143,7 @@
   <script>
   (function(){
     var YEARS=[2025,2024,2023,2022,2021,2020,2019,2018,2017,2016,2015];
-    var DEFAULT=2024;
+    var DEFAULT=2025;
     var sel=document.getElementById('year');
     YEARS.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y+'년';
       if(y===DEFAULT)o.selected=true;sel.appendChild(o);});
@@ -255,7 +204,7 @@
     }
 
     // 빠른 예시 칩(목록에 있으면 동작)
-    var samples=[['삼성전자',2024],['SK하이닉스',2024],['아모레퍼시픽',2024],['현대자동차',2024],['NAVER',2024]];
+    var samples=[['삼성전자',2025],['SK하이닉스',2025],['아모레퍼시픽',2025],['현대자동차',2025],['NAVER',2025]];
     var chips=document.getElementById('chips');
     samples.forEach(function(s){var c=document.createElement('span');c.className='chip';
       c.textContent=s[0]+' '+s[1];
